@@ -1,0 +1,2 @@
+# apma
+Applied mathematics (masters)
