@@ -23,14 +23,15 @@ def probability_that_fire_hits_other_side(p, L=20, MC=10, Dir='0', Str=1):
 
 def percolation_threshold(L, P, MC=10, Dir='0', Strengths=list([1])):
     plt.close('all')
-    fig, ax = plt.subplots(len(Strengths), sharex=True, sharey=True)  # ax is a tuple
-    fig.set_size_inches(10, 10)
-    fig.add_subplot(111, frameon=False)
-    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
-    plt.title('Percolation threshold for L = ' + str(L) + ', wind direction ' + Dir)
-    plt.ylabel('hit probability')
-    plt.xlabel('p')
-    fig.subplots_adjust(hspace=0)
+    if len(Strengths) > 1:
+        fig, ax = plt.subplots(len(Strengths), sharex=True, sharey=True)  # ax is a tuple
+        fig.set_size_inches(10, 10)
+        fig.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+        plt.title('Percolation threshold for L = ' + str(L) + ', wind direction ' + Dir)
+        plt.ylabel('hit probability')
+        plt.xlabel('p')
+        fig.subplots_adjust(hspace=0)
 
     s = 0
     for Str in Strengths:
@@ -41,10 +42,19 @@ def percolation_threshold(L, P, MC=10, Dir='0', Strengths=list([1])):
             res[i] = probability_that_fire_hits_other_side(p, L, MC, Dir=Dir, Str=Str)
             i += 1
 
-        ax[s].plot(P, res)
-        ax[s].set_title('wind strength = ' + str(Str), x=0.15, y=0.85)
-        s += 1
-    plt.savefig('percolation_L' + str(L) + '_MC' + str(MC) + '_Dir' + str(Dir))
+        if len(Strengths) > 1:
+            ax[s].plot(P, res)
+            ax[s].set_title('wind strength = ' + str(Str), x=0.15, y=0.85)
+            s += 1
+        else:
+            plt.plot(P, res)
+            plt.title('Percolation threshold for L = ' + str(L))
+            plt.xlabel('p')
+            plt.ylabel('hit probability')
+    if len(Strengths) > 1:
+        plt.savefig('percolation_L' + str(L) + '_MC' + str(MC) + '_Dir' + str(Dir))
+    else:
+        plt.savefig('exercise1_L' + str(L) + '_MC' + str(MC))
 
 
 def hoshen_kopelman_alg(forest=np.array([])):
@@ -84,14 +94,15 @@ def union(labels, l1, l2):
 def avg_biggest_cluster(L, P, MC=10, Dir='0', Strengths=list([1])):
     """ hoshen_kopelman for L=100, monte carlo for different p """
     plt.close('all')
-    fig, ax = plt.subplots(len(Strengths), sharex=True, sharey=True)  # ax is a tuple
-    fig.set_size_inches(10, 10)
-    fig.add_subplot(111, frameon=False)
-    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
-    plt.title('Biggest cluster of burned trees for L=' + str(L) + ', wind direction ' + Dir)
-    plt.ylabel('number of trees')
-    plt.xlabel('p')
-    fig.subplots_adjust(hspace=0)
+    if len(Strengths) > 1:
+        fig, ax = plt.subplots(len(Strengths), sharex=True, sharey=True)  # ax is a tuple
+        fig.set_size_inches(10, 10)
+        fig.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+        plt.title('Biggest cluster of burned trees for L=' + str(L) + ', wind direction ' + Dir)
+        plt.ylabel('number of trees')
+        plt.xlabel('p')
+        fig.subplots_adjust(hspace=0)
 
     s = 0
     for Str in Strengths:
@@ -105,11 +116,21 @@ def avg_biggest_cluster(L, P, MC=10, Dir='0', Strengths=list([1])):
             res[i] = tmp / MC
             i += 1
 
-        ax[s].plot(P, res)
-        ax[s].set_title('wind strength = ' + str(Str), x=0.15, y=0.85)
-        s += 1
+        if len(Strengths) > 1:
+            ax[s].plot(P, res)
+            ax[s].set_title('wind strength = ' + str(Str), x=0.15, y=0.85)
+            s += 1
+        else:
+            plt.plot(P, res)
+            plt.title(
+                'Biggest cluster of burned trees for L=' + str(L) + ', dir ' + Dir + ' and strength ' + str(Str))
+            plt.xlabel('p')
+            plt.ylabel('number of trees')
 
-    plt.savefig('biggest_cluster_L100_MC' + str(MC) + '_Dir' + str(Dir))
+    if len(Strengths) > 1:
+        plt.savefig('biggest_cluster_L100_MC' + str(MC) + '_Dir' + str(Dir))
+    else:
+        plt.savefig('exercise2')
 
 
 if __name__ == "__main__":
@@ -119,19 +140,37 @@ if __name__ == "__main__":
     MC = 20
     P = [x for x in np.arange(.0, 1.1, .1)]
 
-    L = [20, 50, 100]
-    Direction = ['0', 'N', 'W']
-    Strength = [1, 10, 20]
-    # L = [3, 5, 10]
-    # Direction = ['0', 'N']
-    # Strength = [1, 2, 3]
-
     start = timer()
-    for d in Direction:
-        for l in L:
-            percolation_threshold(L=l, P=P, MC=MC, Dir=d, Strengths=Strength)
-            print('percolation for d=' + d + ', l=' + str(l))
-            print(timer() - start)
-        avg_biggest_cluster(L=L[-1], P=P, MC=MC, Dir=d, Strengths=Strength)
-        print('biggest cluster for d=' + d)
+
+    # exercise 1
+    Strength = [1]
+    L = [20, 50, 100]
+    d = '0'
+    for l in L:
+        percolation_threshold(L=l, P=P, MC=MC, Dir=d, Strengths=Strength)
+        print('percolation for d=' + d + ', l=' + str(l))
         print(timer() - start)
+    print('exercise 1 done\n')
+
+    # exercise 2
+    avg_biggest_cluster(L=L[-1], P=P, MC=MC, Dir=d, Strengths=Strength)
+    print(timer() - start)
+    print('exercise 2 done\n')
+
+    # exercise 3
+    l = 20
+    Strength = [2, 10]
+    Direction = ['N', 'W']
+
+    for D in Direction:
+        percolation_threshold(L=l, P=P, MC=MC, Dir=D, Strengths=Strength)
+        print('percolation for d=' + D + ', l=' + str(l))
+        print(timer() - start)
+        print('')
+
+        avg_biggest_cluster(L=l, P=P, MC=MC, Dir=D, Strengths=Strength)
+        print('biggest cluster for d=' + D)
+        print(timer() - start)
+        print('')
+
+    print('exercise 3 done\n')
