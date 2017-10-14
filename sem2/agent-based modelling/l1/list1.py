@@ -93,8 +93,8 @@ if __name__ == "__main__":
     # print(hoshen_kopelman_alg(f))
     MC = 10
     P = [x for x in np.arange(.1, 1., .1)]
-
-    # L = [20, 50, 100]
+    # TODO add some plots to one figure
+    # L = [20, 50, 100] # TODO change L
     L = [3, 5, 10]
     Direction = ['0', 'N', 'W']
     Strength = [1, 5, 10]

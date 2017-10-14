@@ -1,3 +1,5 @@
+import timeit
+
 import numpy as np
 import random as rnd
 
@@ -5,8 +7,8 @@ import random as rnd
 # 'T' tree; 'X' fire; ' ' empty; '_' burned tree
 # 1 tree; 2 fire; 0 empty; 3 burned tree
 
-def forest_fire(p, L, direction='0', strength=1):
-    return automaton(start_fire(make_forest(L, p)), direction, strength)
+def forest_fire(p, L, Dir='0', Str=1):
+    return automaton(start_fire(make_forest(L, p)), Dir, Str)
 
 
 def make_forest(L=10, p=1.0):
@@ -22,53 +24,65 @@ def print_forest(forest):
     print('')
 
 
-def start_fire(forest):
-    L = forest.shape[0]
-    for i in range(L):
-        if forest[0][i] == 1:
-            forest[0][i] = 2
-        else:
-            forest[0][i] = 0
+def start_fire(forest=np.array([])):
+    forest[0] = [2 if cell == 1 else 0 for cell in forest[0]]
     return forest
 
 
-def wind_direction(x, y, direction, strength=1):
-    i = strength
-    Dir = {
+def wind_direction(x, y, Dir, Str=1):
+    i = Str
+    Directions = {
         '0': [(x - i, y - i), (x - i, y), (x - i, y + i),
               (x, y - i), (x, y + i),
               (x + i, y - i), (x + i, y), (x + i, y + i)],
-        # 'N': [(x - i, y)],
-        # 'S': [(x + i, y)],
-        # 'W': [(x, y - i)],
-        # 'E': [(x, y + i)]
         'N': [(x - i, y - i), (x - i, y), (x - i, y + i)],
         'S': [(x + i, y - i), (x + i, y), (x + i, y + i)],
         'W': [(x - i, y - i), (x, y - i), (x + i, y - i)],
         'E': [(x - i, y + i), (x, y + i), (x + i, y + i)]
     }
-    return Dir[direction]
+    return Directions[Dir]  # if Str > 0 else []
 
 
-def automaton(f1=np.array([]), direction='0', strength=1):
+def direction(x, y, Dir, Str=1):
+    if Dir == '0':
+        res = [(x + i, y + j) for i in range(-Str, Str + 1) for j in range(-Str, Str + 1)]
+
+    elif Dir == 'N':
+        res = [(x - s, y + i) for s in range(1, Str + 1) for i in range(-s, s + 1)]
+    elif Dir == 'S':
+        res = [(x + s, y + i) for s in range(1, Str + 1) for i in range(-s, s + 1)]
+    elif Dir == 'W':
+        res = [(x + i, y - s) for s in range(1, Str + 1) for i in range(-s, s + 1)]
+    elif Dir == 'E':
+        res = [(x + i, y + s) for s in range(1, Str + 1) for i in range(-s, s + 1)]
+    else:
+        res = []
+    return res
+
+
+def automaton(f1=np.array([]), Dir='0', Str=1):
     L = f1.shape[0]
     state_change = True
     f2 = f1.copy()  # forest before and after the move
 
-    while state_change is True:
+    while state_change:
         state_change = False
 
         for x, y in np.ndindex(f1.shape):
-            str0 = strength
 
             if f1[x][y] == 1:  # is tree
-                while str0 > 0:
-                    wind = wind_direction(x, y, direction, strength=str0)
+                str0 = Str
+                caught_fire = False
+
+                while not caught_fire and str0 > 0:  # check neighbours until f[x,y] catches fire or all are checked
+                    wind = direction(x, y, Dir, Str=str0)
                     for i, j in wind:
-                        if 0 <= i < L and 0 <= j < L:  # if neighbour in grid
+                        if 0 <= i < L and 0 <= j < L:  # if neighbour is in grid
                             if f1[i][j] == 2:  # if the neighbour is burning
                                 f2[x][y] = 2
                                 state_change = True
+                                caught_fire = True
+                                break
                     str0 -= 1
 
             elif f1[x][y] == 2:
@@ -82,4 +96,13 @@ def automaton(f1=np.array([]), direction='0', strength=1):
 
 
 if __name__ == '__main__':
-    forest_fire(0.5, 5, 'W', 2)
+    a = timeit.timeit()
+    forest_fire(0.5, 50, 'W', 2)
+    print(a)
+
+    # f = np.array([[0, 2, 2, 0, 0],
+    #               [1, 1, 0, 0, 1],
+    #               [0, 0, 0, 0, 0],
+    #               [1, 1, 1, 1, 0],
+    #               [1, 0, 1, 0, 0]])
+    # automaton(f, 'W', 2)
