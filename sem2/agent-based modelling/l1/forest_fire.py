@@ -1,7 +1,5 @@
-import timeit
-
-import numpy as np
 import random as rnd
+import numpy as np
 
 
 # 'T' tree; 'X' fire; ' ' empty; '_' burned tree
@@ -96,9 +94,7 @@ def automaton(f1=np.array([]), Dir='0', Str=1):
 
 
 if __name__ == '__main__':
-    a = timeit.timeit()
     forest_fire(0.5, 50, 'W', 2)
-    print(a)
 
     # f = np.array([[0, 2, 2, 0, 0],
     #               [1, 1, 0, 0, 1],
