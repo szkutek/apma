@@ -1,0 +1,25 @@
+percolation for d=0, l=20
+4.124704632995417
+percolation for d=0, l=50
+67.52902346200426
+percolation for d=0, l=100
+555.1428507139935
+exercise 1 done
+
+1367.5230023549957
+exercise 2 done
+
+percolation for d=N, l=20
+1376.8059914339974
+
+biggest cluster for d=N
+1387.793677869995
+
+percolation for d=W, l=20
+1409.0772977440065
+
+biggest cluster for d=W
+1431.1629195679998
+
+exercise 3 done
+

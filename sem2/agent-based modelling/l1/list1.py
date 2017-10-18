@@ -137,30 +137,31 @@ if __name__ == "__main__":
     # print(percolation_threshold(0.5, 5, 10))
     # f = forest_fire(0.5, 5)
     # print(hoshen_kopelman_alg(f))
-    MC = 20
-    P = [x for x in np.arange(.0, 1.1, .1)]
+    MC = 50
+    P = [x for x in np.arange(.0, 1.1, .05)]
 
     start = timer()
 
-    # exercise 1
-    Strength = [1]
     L = [20, 50, 100]
     d = '0'
+    Strength = [1]
+    # exercise 1
     for l in L:
         percolation_threshold(L=l, P=P, MC=MC, Dir=d, Strengths=Strength)
         print('percolation for d=' + d + ', l=' + str(l))
         print(timer() - start)
     print('exercise 1 done\n')
 
-    # exercise 2
-    avg_biggest_cluster(L=L[-1], P=P, MC=MC, Dir=d, Strengths=Strength)
+    # # exercise 2
+    avg_biggest_cluster(L=100, P=P, MC=MC, Dir=d, Strengths=Strength)
     print(timer() - start)
     print('exercise 2 done\n')
 
     # exercise 3
-    l = 20
-    Strength = [2, 10]
-    Direction = ['N', 'W']
+    l = 50
+    MC = 20
+    Strength = [2, 10, 20]
+    Direction = ['0', 'N', 'W']
 
     for D in Direction:
         percolation_threshold(L=l, P=P, MC=MC, Dir=D, Strengths=Strength)
