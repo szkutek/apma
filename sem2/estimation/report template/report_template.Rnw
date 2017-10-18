@@ -1,0 +1,104 @@
+\documentclass[12pt, a4paper]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX packages
+%\usepackage[OT4]{polski}
+\usepackage[cp1250]{inputenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% global settings
+<<global_settings, echo=FALSE, warning=FALSE>>=
+library(knitr)
+library(xtable) #package to create tables in LaTeX format
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+@
+
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% title page
+\title{Estimation theory -- report template}
+\author{Name and surname \\ Student no.}
+\maketitle
+\tableofcontents 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exercise 1}
+
+In order to include R code chunk  use the following syntax:
+<<example_chunk, echo=TRUE, eval=TRUE>>=
+# random sample from standard normal distribution
+X <- rnorm(100)
+
+# summary statistics
+summary(X)
+@
+
+Remark: To display the output of a code chunk but not the underlying R code, you specify the echo=FALSE option.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exercise 2}
+
+R code chunks can  be used to create plots dynamically too.
+For example,  to obtain histogram write:
+<<example_hist, echo=TRUE, eval=TRUE, fig.cap="Add caption here">>=
+hist(X, main="Histogram")
+@
+Note that one can easily add  reference to the generated figures.  For example: Figure~\ref{fig:example_hist} shows histogram.
+
+
+Creating nice looking tables is not much more difficult. For this purpose you can use
+function {\em xtable()}. Here is a small example:
+<<example_table, echo=FALSE, eval=TRUE, results='asis'>>=
+tab1 <- xtable(matrix(rnorm(20), 4), digits = 3, row.names = TRUE,
+  caption = "Add caption here", label = "tab:table1")
+  print(tab1, type = "latex", table.placement = "H")
+@
+You can add a reference to our table~\ref{tab:table1} too.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exercise 3}
+
+If needed (e.g. when answering theoretical problems etc.), use \LaTeX \ syntax to add mathematical formulas. For example, inline (within text) formulas can be included using: $a^2+b^2=c^2$. On the other hand, 	displayed equations can be added as follows:
+\begin{equation}
+\label{eq:wzor1}
+\overline{X} = \frac{1}{n}\sum_{i=1}^n X_i,
+\end{equation}
+where $n$ denotes sample size.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exercise 4}
+
+{\bf A few final suggestions:}
+\begin{itemize}
+\item The results of simulations or analysis should be presented in a clear format.
+\item When you plot the graphs, remember about axis descriptions, setting appropriate axis limits (e.g: \verb+ plot (..., xlim = c (x.min, x.max), ylim = c (y.min, y.max)+), adding legend (necessary when there are several lines in the graph), and adding a caption under the graph or table.
+\item If possible try to show the results in a condensed form (e.g. comparing several charts in one figure, comparing the results in a single table, etc.).
+
+\item It is worth to consider whether all R-codes should be visible in the report (option {\verb+ echo = TRUE / FALSE+}).
+
+\item Remember to carefully format the R-codes and write appropriate comments (also in the case of chunks that are invisible in the report. You can use the following option available in RStudio: $Code \; \rightarrow\; Reformate \;  Code$.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+When using additional source materials (books, links, etc.)
+do not forget to include appropriate references.  For example, let us assume 
+we want to cite Dalgard (2008). Then the bibliography section should contain:
+
+\begin{thebibliography}{}
+ 
+\bibitem{Dalgard2008}
+  Peter Dalgaard, \emph{Introductory Statistics with R}, Springer-Verlag New York, 2008.
+
+\end{thebibliography}
+
+\end{document}
