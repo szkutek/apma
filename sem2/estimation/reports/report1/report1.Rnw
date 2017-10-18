@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LaTeX packages
 %\usepackage[OT4]{polski}
-\usepackage[cp1250]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -19,9 +19,9 @@
 % global settings
 <<global_settings, echo=FALSE, warning=FALSE>>=
 library(knitr)
-library(xtable) #package to create tables in LaTeX format
-# library(matlib) # ex2
+# library(xtable) #package to create tables in LaTeX format
 library(mvtnorm) # ex2
+library(matlib) # ex2
 opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
 @
 
@@ -39,7 +39,7 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Exercise 1}
 
-We generate a vecotr of $Y\sim N(\mu=2, \sigma^2=4)$ with length $N = 1000$:
+We generate a vector of $Y\sim N(\mu=2, \sigma^2=4)$ with length $N = 1000$:
 <<ex1.1, echo=TRUE, eval=FALSE>>=
 Y <- rnorm(n = 1000, mean = 2, sd = 2)
 # transform Y to Y1
@@ -83,12 +83,14 @@ $Y_2$ is a quadratic function of $Y_1$, so we know that distribution of $Y_2$ is
 
 We can obtain the analytical value of $E(Y_2)$ in the following way
 \begin{align*}
-E(Y_2)=& E(\left( \frac{Y_1-2}{2} \right)^2) = \frac{1}{4} E(Y_1-2)^2 = \frac{1}{4} E(Y_1^2 - 2Y_1 +4) =  \\ 
-=& \frac{1}{4} E(Y_1^2) - \frac{1}{2} E(Y_1) + 1= \frac{1}{4}(Var(Y_1)+(E(Y_1))^2)-\frac{1}{2} E(Y_1) + 1 = \\
-=& \frac{1}{4} (36 + 9) - \frac{3}{2} + 1 = 10.75
+E(Y_2)=& E\left(\left( \frac{Y_1-2}{2} \right)^2\right) = \frac{1}{4} E(Y_1-2)^2 = \frac{1}{4} E(Y_1^2 - 2Y_1 +4) =  \\ 
+=& \frac{1}{4} EY_1^2 - \frac{1}{2} E Y_1 + 1= \frac{1}{4}\left(Var Y_1 +(E Y_1)^2\right)-\frac{1}{2} E Y_1 + 1 = \\
+=& \frac{1}{4} (36 + 9) - \frac{3}{2} + 1 = 10.75,
 \end{align*}
 
-<<ex1.2hist, echo=TRUE, eval=TRUE>>=
+so $\lambda = \frac{1}{10.75}\approx 0.093$.
+
+<<ex1.2hist, echo=FALSE, eval=TRUE>>=
 Y <- rnorm(n = 1000, mean = 2, sd = 2)
 Y1 <- 3 * (Y - 1) 
 Y2 <- ((Y1 - 2) / 2) ^ 2
@@ -98,12 +100,12 @@ x <- seq(0, 120, by = 0.01)
 y <- dexp(x, rate = 1 / EY2)
 lines(x, y, col = "red")
 @
-Next we will compute a sequence of means $m_n$ and a sequence of variances $\sigma_n^2$ for the variable $Y$, where
+Next we will compute a sequence of means $m_n$ and a sequence of variances $\sigma_n^2$ for the variable~$Y$, where
 \[ m_n = \frac{1}{n} \sum_{i=1}^{n} Y_i \]
 \[ \sigma_n = \frac{1}{n} \sum_{i=1}^{n} (Y_i - m_n)^2 \]
 and plot the results.
 
-<<ex1.2seq, echo=TRUE, eval=TRUE>>=
+<<ex1.2seq, echo=FALSE, eval=TRUE>>=
 nn = 1000
 N <- seq(1, nn, by=1)
 Y <- rnorm(n = nn, mean = 2, sd = 2)
@@ -117,7 +119,7 @@ lines(N, rep(2, length(N), type = "l", col = "red"))
 
 The sequences $m_n$ and $\sigma_n^2$ converge to theoretical mean and variance, respectively. To examine the variability of the sequences we can calculate relative errors for both values.
 
-\[ err_M = \]
+\[ err_{M_n} = \left| \frac{M_n - \mu_n}{\mu_n}  \right| \]
 
 <<ex1.2err, echo=FALSE, eval=TRUE>>=
 nn = 1000
@@ -132,6 +134,19 @@ plot(N, errM)
 @
 
 For $N>200$ value of the error is less than $10\%$ of theoretical mean.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -157,43 +172,88 @@ We have to transform variable $X$ into variable $Y \sim N(\mu, \Sigma)$, where
     \end{matrix} 
     \right]
 \]
-It means that we should find vector $a$ and matrix $A$, such that $Y=A X + a$. From the lecture we know that if 
-\[ X\sim N(0, I_2), \quad Y\sim N(\mu, \Sigma) \quad \text{and }\quad Y = AX + b,\] 
-then 
-\[Y = \Sigma^{0.5}X + \mu. \] 
+It means that we should find vector $a$ and matrix $A$, such that $Y=A X + a$. 
+
+% From the lecture we know that if 
+% \[ X\sim N(0, I_2), \quad Y\sim N(\mu, \Sigma) \quad \text{and }\quad Y = AX + b,\] 
+% then 
+% \[Y = \Sigma^{0.5}X + \mu. \] 
+
+Expected value of $Y$ is equal to
+\[E(Y) = E(AX+a) = A E(X)+a = a, \]
+and variance
+\[Var(Y) = Var(AX+a) = Var(AX) = A Var(X) A' = A I A' = A A' = \Sigma = \Sigma^{0.5} \left(\Sigma^{0.5}\right)'. \]
+From that we obtain $A = \Sigma^{0.5}$, so 
+\[ Y = \Sigma^{0.5}X + \mu.  \]
+% \[ A = \Sigma^{0.5}\] \quad \text{and }\quad a = \mu. \]
+
+<<ex2Y, echo=FALSE, eval=TRUE, fig.cap="Random variable $Y$">>=
+n <- 10000
+mu <- c(0, 0)
+Sigma <- diag(2)
+X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
+
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- mpower(Sigma, 0.5)
+a <- mu
+Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
+Yt = t(Y)
+plot(Yt)
+@
+
+<<ex2hist3d, echo=FALSE, eval=TRUE, fig.cap="3D histogram of random variable $Y$ with 30 bins.">>=
+library(matlib)
+n <- 10000
+mu <- c(0, 0)
+Sigma <- diag(2)
+X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
+
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- mpower(Sigma, 0.5)
+a <- mu
+Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
+Yt = t(Y)
+
+Y1_c <- cut(Yt[, 1], 30)
+Y2_c <- cut(Yt[, 2], 30)
+hist3D(z = table(Y1_c, Y2_c), border = "black")
+@
+
+<<ex2histZ, echo=TRUE, eval=TRUE>>=
+n <- 10000
+mu <- c(0, 0)
+Sigma <- diag(2)
+X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
+plot(X)
+@
 
 
-\[Y = AX+a\]
-\[E(Y) = E(AX+a) = A E(X)+a = a \]
-\[Var(Y) = Var(AX+a) = Var(AX) = A Var(X) A' = A I A' = A A' = \Sigma = \Sigma^{0.5} \left(\Sigma^{0.5}\right)' \]
-It means that 
-\[ A = \Sigma^{0.5} \quad \text{and }\quad a = \mu. \]
+
+
+
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Exercise 3}
 
-If needed (e.g. when answering theoretical problems etc.), use \LaTeX \ syntax to add mathematical formulas. For example, inline (within text) formulas can be included using: $a^2+b^2=c^2$. On the other hand, 	displayed equations can be added as follows:
-\begin{equation}
-\label{eq:wzor1}
-\overline{X} = \frac{1}{n}\sum_{i=1}^n X_i,
-\end{equation}
-where $n$ denotes sample size.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Exercise 4}
 
-{\bf A few final suggestions:}
-\begin{itemize}
-\item The results of simulations or analysis should be presented in a clear format.
-\item When you plot the graphs, remember about axis descriptions, setting appropriate axis limits (e.g: \verb+ plot (..., xlim = c (x.min, x.max), ylim = c (y.min, y.max)+), adding legend (necessary when there are several lines in the graph), and adding a caption under the graph or table.
-\item If possible try to show the results in a condensed form (e.g. comparing several charts in one figure, comparing the results in a single table, etc.).
 
-\item It is worth to consider whether all R-codes should be visible in the report (option {\verb+ echo = TRUE / FALSE+}).
 
-\item Remember to carefully format the R-codes and write appropriate comments (also in the case of chunks that are invisible in the report. You can use the following option available in RStudio: $Code \; \rightarrow\; Reformate \;  Code$.
-\end{itemize}
+
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 When using additional source materials (books, links, etc.)

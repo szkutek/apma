@@ -1,4 +1,4 @@
-library(mvtnorm)
+# library(mvtnorm)
 library(matlib)
 
 # exercise 1.1
@@ -9,17 +9,24 @@ Sigma <- diag(2)
 X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
 plot(X)
 
-mu <- t(c(0, 1))
-Sigma <- matrix(c(2, .5, .5, 2), 2, 2)
-
-A <- mpower(Sigma , .5)
+# exercise 1.3
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- mpower(Sigma, 0.5)
 a <- mu
-Y <- A %*% t(X) + a
-plot(Y)
-
-mean = matrix(c(0,1),1,2)
-sigma <- matrix(c(2,0.5,0.5,2),2,2)
-A <- mpower(sigma, 0.5)
-a <- mean
 Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
-plot(t(Y))
+Yt = t(Y)
+plot(Yt)
+
+Y1_c <- cut(Yt[, 1], 30)
+Y2_c <- cut(Yt[, 2], 30)
+hist3D(z = table(Y1_c, Y2_c), border = "black")
+# image2D(z = table(Y1_c, Y2_c), border = "black")
+
+# exercise 1.4
+Z = Yt %*% mpower(Sigma,-1) %*% Y
+# Z <- t(Y) %*% solve(Sigma) %*% Y
+plot(Z)
+Z1_c <- cut(Z[, 1], 20)
+Z2_c <- cut(Z[, 2], 20)
+hist3D(z = table(Z1_c, Z2_c), border = "black")
