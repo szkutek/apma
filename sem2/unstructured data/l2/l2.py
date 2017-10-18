@@ -22,17 +22,18 @@ if __name__ == '__main__':
         for c in research_per_year.contents:  # one year
             if c != '\n':
                 names_per_paper = [unidecode.unidecode(x.text).replace(' ', '')  # remove accents and spaces
-                                   for x in c.find_all('b')]  # authors of one paper
-                comb = [*itertools.combinations(names_per_paper, 2)]  # create pairs
-                if comb:  # if comb is not empty # cooperation_network.add_edges_from(comb)
+                                   for x in c.find_all('b')]  # authors of one paper (in bold)
+
+                if len(names_per_paper) > 1:  # if comb is not empty # cooperation_network.add_edges_from(comb)
+                    comb = [*itertools.combinations(names_per_paper, 2)]  # create pairs
                     for a1, a2 in comb:
                         if cooperation_network.has_edge(a1, a2):
                             cooperation_network[a1][a2]['weight'] += 1
                         else:
                             cooperation_network.add_edge(a1, a2, weight=1)
 
-    # else:  # only one author (worked alone or co-authored with non-members of HSC) ???
-    #     cooperation_network.add_node(names_per_paper[0])
+                elif names_per_paper:  # only one author (worked alone or co-authored with non-members of HSC)
+                    cooperation_network.add_node(names_per_paper[0])
 
     fig = pylab.figure()
     pos = nx.spring_layout(cooperation_network)
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     nx.draw_networkx_nodes(cooperation_network, pos, node_color='g', alpha=0.8,
                            nodelist=degrees.keys(),
                            node_size=[*map(lambda x: 10 * x + 1,
-                                           degrees.values())])  # [deg * 10 for deg in degrees.values()] # larger nodes
+                                           degrees.values())])
 
     nx.draw_networkx_edges(cooperation_network, pos, alpha=0.5,
                            edgelist=cooperation_network.edges(),
@@ -55,5 +56,10 @@ if __name__ == '__main__':
     #                              edge_labels=dict(zip(cooperation_network.edges(), weights)))
 
     print(degrees)
-    print(len(degrees))
+    print(len(degrees.keys()))
+
+    connected_components = [*nx.connected_components(cooperation_network)]
+    for component in connected_components:
+        print(component)
+
     pylab.show()

@@ -18,6 +18,12 @@ if __name__ == '__main__':
         group.plot.scatter(x='Age', y='Fare', label=key, color=colors[key], ax=ax,
                            title='scatter plot with fare and age')
 
+    # ks = data[data.Sex == 'male']
+    # ks2 = data[data.Sex == 'female']
+    # 
+    # ax2 = ks.plot.scatter(y='Fare', x='Age', color='DarkBlue', label='male')
+    # ks2.plot.scatter(y='Fare', x='Age', color='Magenta', label='female', ax=ax2)
+
     # # AD. 5
     df5 = data['Survived'].sum()
 
