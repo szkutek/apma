@@ -69,19 +69,14 @@ def automaton(f1=np.array([]), Dir='0', Str=1):
         for x, y in np.ndindex(f1.shape):
 
             if f1[x][y] == 1:  # is tree
-                str0 = Str
-                caught_fire = False
-
-                while not caught_fire and str0 > 0:  # check neighbours until f[x,y] catches fire or all are checked
-                    wind = direction(x, y, Dir, Str=str0)
-                    for i, j in wind:
-                        if 0 <= i < L and 0 <= j < L:  # if neighbour is in grid
-                            if f1[i][j] == 2:  # if the neighbour is burning
-                                f2[x][y] = 2
-                                state_change = True
-                                caught_fire = True
-                                break
-                    str0 -= 1
+                wind = direction(x, y, Dir, Str=Str)
+                for i, j in wind:
+                    if 0 <= i < L and 0 <= j < L:  # if neighbour is in grid
+                        if f1[i][j] == 2:  # if the neighbour is burning
+                            f2[x][y] = 2
+                            state_change = True
+                            caught_fire = True
+                            break
 
             elif f1[x][y] == 2:
                 f2[x][y] = 3
