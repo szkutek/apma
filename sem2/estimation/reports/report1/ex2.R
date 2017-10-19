@@ -1,5 +1,6 @@
-# library(mvtnorm)
+library(mvtnorm)
 library(matlib)
+library(plot3D)
 
 # exercise 1.1
 n <- 10000
@@ -7,7 +8,7 @@ mu <- c(0, 0)
 Sigma <- diag(2)
 # X <- mvrnorm(n = n, mu = m, Sigma = v) # from mvtnorm library
 X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
-plot(X)
+# plot(X)
 
 # exercise 1.3
 mu = matrix(c(0, 1), 1, 2)
@@ -16,10 +17,15 @@ A <- mpower(Sigma, 0.5)
 a <- mu
 Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
 Yt = t(Y)
-plot(Yt)
+# plot(Yt)
 
-Y1_c <- cut(Yt[, 1], 30)
-Y2_c <- cut(Yt[, 2], 30)
+Y1_c <- cut(Yt[, 1], 5)
+Y2_c <- cut(Yt[, 2], 6)
+hist3D(z = table(Y1_c, Y2_c), border = "black")
+# image2D(z = table(Y1_c, Y2_c), border = "black")
+
+Y1_c <- cut(Yt[, 1], 6)
+Y2_c <- cut(Yt[, 2], 5)
 hist3D(z = table(Y1_c, Y2_c), border = "black")
 # image2D(z = table(Y1_c, Y2_c), border = "black")
 

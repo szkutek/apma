@@ -25,10 +25,12 @@ print(mean1)
 print(mean2)
 print(var1)
 print(var2)
+
 hist(Y[1,], freq = FALSE)
 x <- seq(-5, 5, by = 0.01)
 y <- dnorm(x, 0, sqrt(2))
 lines(x, y, col = "red")
+
 hist(Y[2,], freq = FALSE)
 x <- seq(-5, 5, by = 0.01)
 y <- dnorm(x, 1, sqrt(2))

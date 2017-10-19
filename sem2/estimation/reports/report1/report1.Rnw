@@ -1,6 +1,4 @@
-% WARIANCJA CUMSUM I ROZKLAD WYKLADNICZY, PODPISAC WYKRESY, 
-% ??? sigma^0.5 symmetric? 
-%  subplot dla sekwencji M i V
+% TODO CHECK FOR MISTAKES
 
 \documentclass[12pt, a4paper]{article}
 
@@ -22,6 +20,8 @@ library(knitr)
 # library(xtable) #package to create tables in LaTeX format
 library(mvtnorm) # ex2
 library(matlib) # ex2
+library(plot3D)
+# library(plotly)
 opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
 @
 
@@ -67,70 +67,57 @@ y <- dnorm(x, 3, 6)
 lines(x, y, col = "red")
 @
 
-Next, we create variable $Y_2$
-\[ Y_2 = \left( \frac{Y_1-2}{2} \right)^2 \]
-and plot its frequency historam.
-<<ex1.2, echo=TRUE, eval=TRUE>>=
+Next, we create variable $Y_2 = \left( \frac{Y-2}{2} \right)^2$.
+$Y_2$ is a quadratic function of $Y$, so we know that distribution of $Y_2$ is not normal. What is more, 
+\[\frac{Y-2}{2} \sim N(0,1).\] 
+It means that $Y_2$, as a sum of squared standard normally distributed variables, has $\chi^2$ distribution with 1 degree of freedom.
+
+<<ex1.2hist, echo=FALSE, eval=TRUE, fig.cap="Histogram and theoretical probability density function of $Y_2$" >>=
 Y <- rnorm(n = 1000, mean = 2, sd = 2)
-Y1 <- 3 * (Y - 1) 
-Y2 <- ((Y1 - 2) / 2) ^ 2
-
-hist(Y2, freq = FALSE)
-@
-
-$Y_2$ is a quadratic function of $Y_1$, so we know that distribution of $Y_2$ is not normal. From the shape histogram we can assume that $Y_2$ has exponential distribution with 
-\[\lambda = \frac{1}{E(Y_2)}.\]
-
-We can obtain the analytical value of $E(Y_2)$ in the following way
-\begin{align*}
-E(Y_2)=& E\left(\left( \frac{Y_1-2}{2} \right)^2\right) = \frac{1}{4} E(Y_1-2)^2 = \frac{1}{4} E(Y_1^2 - 2Y_1 +4) =  \\ 
-=& \frac{1}{4} EY_1^2 - \frac{1}{2} E Y_1 + 1= \frac{1}{4}\left(Var Y_1 +(E Y_1)^2\right)-\frac{1}{2} E Y_1 + 1 = \\
-=& \frac{1}{4} (36 + 9) - \frac{3}{2} + 1 = 10.75,
-\end{align*}
-
-so $\lambda = \frac{1}{10.75}\approx 0.093$.
-
-<<ex1.2hist, echo=FALSE, eval=TRUE>>=
-Y <- rnorm(n = 1000, mean = 2, sd = 2)
-Y1 <- 3 * (Y - 1) 
-Y2 <- ((Y1 - 2) / 2) ^ 2
-EY2 <- 10.75
+Y2 <- ((Y - 2) / 2) ^ 2
 hist(Y2, freq = FALSE)
 x <- seq(0, 120, by = 0.01)
-y <- dexp(x, rate = 1 / EY2)
+y <- dchisq(x, 1)
 lines(x, y, col = "red")
 @
+
+% EX 1.3
+
 Next we will compute a sequence of means $m_n$ and a sequence of variances $\sigma_n^2$ for the variable~$Y$, where
-\[ m_n = \frac{1}{n} \sum_{i=1}^{n} Y_i \]
+\[ m_n = \frac{1}{n} \sum_{i=1}^{n} Y_i, \]
 \[ \sigma_n = \frac{1}{n} \sum_{i=1}^{n} (Y_i - m_n)^2 \]
 and plot the results.
 
-<<ex1.2seq, echo=FALSE, eval=TRUE>>=
+<<ex1.2seq, echo=FALSE, eval=TRUE, fig.pos='H',fig.width=7, fig.height=4, fig.cap="Sequence of means and variances and their respective analytical values.">>=
 nn = 1000
-N <- seq(1, nn, by=1)
+N <- seq(1, nn, by = 1)
 Y <- rnorm(n = nn, mean = 2, sd = 2)
 M <- cumsum(Y) / N
-# V <- cumsum((Y - mean(Y)) ^ 2)/N
+V <- cumsum((Y - M) ^ 2) / N
+
+par(mfrow = c(1, 2))
 plot(N, M)
 lines(N, rep(2, length(N), type = "l", col = "red"))
-# plot(N, V)
-# lines(N, rep(4, length(N), type = "l", col = "red"))
+plot(N, V)
+lines(N, rep(4, length(N), type = "l", col = "red"))
 @
 
 The sequences $m_n$ and $\sigma_n^2$ converge to theoretical mean and variance, respectively. To examine the variability of the sequences we can calculate relative errors for both values.
 
-\[ err_{M_n} = \left| \frac{M_n - \mu_n}{\mu_n}  \right| \]
+\[ err_{m_n} = \left| \frac{m_n - \mu_n}{\mu_n}  \right| , \qquad
+   err_{\sigma_n^2} = \left| \frac{\sigma_n^2 - \sigma_n}{\sigma_n}  \right| \]
 
-<<ex1.2err, echo=FALSE, eval=TRUE>>=
+<<ex1.2err, echo=FALSE, eval=TRUE, fig.pos='H',fig.width=7, fig.height=4, fig.cap="Relative errors for sequences of means and variances">>=
 nn = 1000
-N <- seq(1, nn, by=1)
+N <- seq(1, nn, by = 1)
 Y <- rnorm(n = nn, mean = 2, sd = 2)
 M <- cumsum(Y) / N
-# V <- cumsum((Y - mean(Y)) ^ 2)/N
-
-errM  <- abs(M-2)/2
-# errV
+V <- cumsum((Y - M) ^ 2) / N
+errM  <- abs(M - 2) / 2
+errV <- abs(V - 4) / 4
+par(mfrow = c(1, 2))
 plot(N, errM)
+plot(N, errV)
 @
 
 For $N>200$ value of the error is less than $10\%$ of theoretical mean.
@@ -155,7 +142,7 @@ For $N>200$ value of the error is less than $10\%$ of theoretical mean.
 
 We simulate 10000 times and then plot 2-dimensional random variable $X\sim N(0,I_2)$.
 
-<<ex2X, echo=TRUE, eval=TRUE>>=
+<<ex2X, echo=FALSE, eval=TRUE, fig.cap="2-dimensional random variable $X$ of $N(0,I_2)$ distribution.">>=
 n <- 10000
 mu <- c(0, 0)
 Sigma <- diag(2)
@@ -173,60 +160,100 @@ We have to transform variable $X$ into variable $Y \sim N(\mu, \Sigma)$, where
     \right]
 \]
 It means that we should find vector $a$ and matrix $A$, such that $Y=A X + a$. 
-
-% From the lecture we know that if 
-% \[ X\sim N(0, I_2), \quad Y\sim N(\mu, \Sigma) \quad \text{and }\quad Y = AX + b,\] 
-% then 
-% \[Y = \Sigma^{0.5}X + \mu. \] 
-
 Expected value of $Y$ is equal to
 \[E(Y) = E(AX+a) = A E(X)+a = a, \]
 and variance
-\[Var(Y) = Var(AX+a) = Var(AX) = A Var(X) A' = A I A' = A A' = \Sigma = \Sigma^{0.5} \left(\Sigma^{0.5}\right)'. \]
-From that we obtain $A = \Sigma^{0.5}$, so 
-\[ Y = \Sigma^{0.5}X + \mu.  \]
-% \[ A = \Sigma^{0.5}\] \quad \text{and }\quad a = \mu. \]
+\[Var(Y) = Var(AX+a) = Var(AX) = A Var(X) A' = A I A' = A A' = \Sigma \]
 
-<<ex2Y, echo=FALSE, eval=TRUE, fig.cap="Random variable $Y$">>=
-n <- 10000
-mu <- c(0, 0)
-Sigma <- diag(2)
-X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
-
-mu = matrix(c(0, 1), 1, 2)
+We know that $\Sigma$ is a symmetric and positive definite matrix, so we can use Cholesky decomposition (chol() function in R) to obtain the value of $A$:
+<<ex2.2chol, echo=TRUE, eval=TRUE>>=
 Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
-A <- mpower(Sigma, 0.5)
-a <- mu
-Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
-Yt = t(Y)
-plot(Yt)
+chol(Sigma)
 @
 
-<<ex2hist3d, echo=FALSE, eval=TRUE, fig.cap="3D histogram of random variable $Y$ with 30 bins.">>=
-library(matlib)
+<<ex2.2Y, echo=FALSE, eval=FALSE, fig.cap="10000 realizations of the random variable $Y$">>=
 n <- 10000
 mu <- c(0, 0)
 Sigma <- diag(2)
 X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
-
 mu = matrix(c(0, 1), 1, 2)
 Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
-A <- mpower(Sigma, 0.5)
+A <- chol(Sigma)
 a <- mu
 Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
-Yt = t(Y)
+plot(t(Y))
+@
 
-Y1_c <- cut(Yt[, 1], 30)
-Y2_c <- cut(Yt[, 2], 30)
+
+<<ex2checkDistrY2, echo=FALSE, eval=TRUE, fig.cap="Histograms and probability density functions of Y",fig.pos='H',fig.width=7, fig.height=4>>=
+n <- 10000
+mu <- c(0, 0)
+Sigma <- diag(2)
+X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- chol(Sigma)
+a <- mu
+Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
+
+par(mfrow = c(1, 2))
+p1.hist <- hist(Y[1,], freq = FALSE)
+x <- seq(-5, 5, by = 0.01)
+y <- dnorm(x, 0, sqrt(2))
+p1.lines <- lines(x, y, col = "red")
+
+p2.hist <- hist(Y[2,], freq = FALSE)
+x <- seq(-5, 5, by = 0.01)
+y <- dnorm(x, 1, sqrt(2))
+p2.lines <- lines(x, y, col = "red")
+@
+
+Now we can plot the 3D histogram of the random variable $Y = \left[\begin{matrix} 1.414214 & 0.3535534 \\ 0.0 & 1.3693064 \end{matrix} \right]X+\mu$.
+<<ex2.3hist3d, echo=FALSE, eval=TRUE, fig.cap="Random variable $Y$ and its 3D histogram with 30 bins and bars colored according to height.", fig.width=7>>=
+n <- 10000
+mu <- c(0, 0)
+Sigma <- diag(2)
+X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- chol(Sigma)
+a <- mu
+Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
+Y1_c <- cut(Y[1, ], 5)
+Y2_c <- cut(Y[2, ], 6)
+
+par(mfrow = c(1, 2))
+plot(t(Y))
 hist3D(z = table(Y1_c, Y2_c), border = "black")
 @
 
-<<ex2histZ, echo=TRUE, eval=TRUE>>=
+% exercise 2.4
+
+We are going to transform the variable $Y$ into the variable $Z= (Y-\mu)' \Sigma^{-1} (Y-\mu)$, and $\Sigma$ is a non-singular matrix.
+\[
+Z = (Y-\mu)' \Sigma^{-1} (Y-\mu) = (Y-\mu)' \Sigma^{-0.5} \Sigma^{-0.5} (Y-\mu) = \left(\Sigma^{-0.5} (Y-\mu)\right)' \left(\Sigma^{-0.5} (Y-\mu)\right)
+\]
+Let's take $\Sigma^{-0.5} (Y-\mu) = B$. We know that $B \sim N(0,I)$, so $B'B \sim \chi^2(k)$, where $k=2$.
+
+
+<<ex2.4histZ, echo=FALSE, eval=TRUE, fig.cap="Random variable $Z$ and its 3D histogram with 30 bins and bars colored according to height.", fig.width=7>>=
 n <- 10000
 mu <- c(0, 0)
 Sigma <- diag(2)
 X <- rmvnorm(n = n, mean = mu, sigma =  Sigma)
-plot(X)
+mu = matrix(c(0, 1), 1, 2)
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+A <- chol(Sigma)
+a <- mu
+Y <- A %*% t(X) + t(apply(t(a), 1, rep, n))
+Sigma <- matrix(c(2, 0.5, 0.5, 2), 2, 2)
+Z <- t(Y-t(apply(t(a), 1, rep, n))) %*% solve(Sigma) %*% (Y-t(apply(t(a), 1, rep, n)))
+Z1_c <- cut(Z[, 1], 5)
+Z2_c <- cut(Z[, 2], 6)
+
+par(mfrow = c(1, 2))
+plot(Z)
+hist3D(z = table(Z1_c, Z2_c), border = "black")
 @
 
 
@@ -244,6 +271,56 @@ plot(X)
 \section{Exercise 3}
 
 
+Let $\hat{\beta}$ be a sequence of estimators of a $(K\times 1)$ vector $\beta$, which is asymptotically normal with 
+\[ \sqrt{N} (\hat{\beta} - \beta) \rightarrow^d N(0,\Sigma) .\]
+
+% EX 3.1
+\subsection{Part 1}
+
+If $R \neq 0$ is an $(M\times K)$ matrix, the asymptotic distribution of $\sqrt{N} (R \hat{\beta} - R \beta) \rightarrow^? N(\mu, \sigma)$. We will compute the mean and the variance of $\sqrt{N} (R \hat{\beta} - R \beta)$.
+
+\[ \mu = E\left(\sqrt{N} (R \hat{\beta} - R \beta) \right) = E\left(\sqrt{N} R( \hat{\beta} - \beta) \right) = R\ E\left(\sqrt{N} ( \hat{\beta} - \beta) \right) = 0 \]
+and
+\[ \sigma = Var\left(\sqrt{N} (R \hat{\beta} - R \beta)\right) = Var\left(\sqrt{N} R(\hat{\beta} - \beta)\right) 
+  =\footnote{From task 2 point 2.}\ R\ Var\left(\sqrt{N} (\hat{\beta} -\beta)\right) R' = R \Sigma R',\]
+so 
+\[ \sqrt{N} (R \hat{\beta} - R \beta) \rightarrow^d N(0, R \Sigma R'),\ \text{for } R \neq 0. \]
+
+
+% EX 3.2
+\subsection{Part 2}
+
+If $p \lim \hat{A} = A$ then the asymptotic distribution of $\sqrt{N}\hat{A}(\hat{\beta}-\beta) \rightarrow^? N(\mu, \sigma)$. 
+We know that if $x_n \rightarrow^d x$ and $p \lim y_n = c$, $x_n y_n \rightarrow^d c x$, so
+
+\[ \sqrt{N}\hat{A}(\hat{\beta}-\beta) \rightarrow^d \sqrt{N} A (\hat{\beta}-\beta) \rightarrow^d N(0, A\Sigma A').  \]
+
+
+% EX 3.3
+\subsection{Part 3}
+
+We will prove that $N \left( \hat\beta-\beta \right)' \hat{\Sigma}^{-1} \left( \hat\beta-\beta \right) \rightarrow^d \chi^2 (K)$ if $\Sigma$ is a non-singular matrix and $p \lim \hat{\Sigma} = \Sigma$.
+
+\begin{gather*}
+               \sqrt{N} \left( \hat\beta-\beta \right)' \hat{\Sigma}^{-0.5} \hat{\Sigma}^{-0.5} \left( \hat\beta-\beta \right)\sqrt{N} \\
+\downarrow^d \\
+               \sqrt{N} \left( \hat\beta-\beta \right)' \Sigma^{-0.5} \Sigma^{-0.5} \left( \hat\beta-\beta \right)\sqrt{N} \\
+=           \\
+                \left( \sqrt{N} \Sigma^{-0.5} \left( \hat\beta-\beta \right) \right)' \left( \sqrt{N} \Sigma^{-0.5} \left( \hat\beta-\beta \right) \right).
+\end{gather*}
+
+Let 
+\[C = \left( \sqrt{N} \Sigma^{-0.5} \left( \hat\beta-\beta \right)' \right) \rightarrow\footnote{From task 3 part 1.} N(0, \underbrace{ \Sigma^{-0.5}\Sigma \Sigma^{-0.5} }_{I_K}) \]
+
+We have $C' C$, where $ C \rightarrow^d N(0,\ I_K)$, so 
+\[ C' C \rightarrow^d \chi^2 (K). \]
+
+
+
+
+
+
+
 
 
 
@@ -256,15 +333,5 @@ plot(X)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-When using additional source materials (books, links, etc.)
-do not forget to include appropriate references.  For example, let us assume 
-we want to cite Dalgard (2008). Then the bibliography section should contain:
-
-\begin{thebibliography}{}
- 
-\bibitem{Dalgard2008}
-  Peter Dalgaard, \emph{Introductory Statistics with R}, Springer-Verlag New York, 2008.
-
-\end{thebibliography}
 
 \end{document}
