@@ -1,0 +1,148 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+
+\title{Comparison of $\alpha$-stable random variable generators}
+\author{Agnieszka Szkutek}
+\date{\parbox{\linewidth}{\centering%
+  May 2017
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  Wroclaw University of Science and Technology
+  }}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In this report we are going to compare three $\alpha$-stable random variable generators:
+\begin{enumerate}
+	\item Chambers-Mallows-Stuck algorithm,
+	\item Generalized Central Limit Theorem method with Pareto distribution with $\lambda=1$
+	\item and Series representation.
+\end{enumerate}
+in terms of speed and accuracy.
+
+
+
+\section{Comparison in terms of accuracy}
+In order to test how accurate the generators are, we are going to simulate realizations of $\alpha$-stable random variables with several different sets of parameters. Then we will compare $\alpha$ and $\mu$ that we used, with parameters estimated using John Nolan's program.
+
+The Series representation method produces $\alpha$-stable random variables with $\beta = 0$. The method can be generalized, but we will take only $\beta=0$.
+We will also take $\sigma = 1$ and $\mu=0$, and $\alpha=0.5$ and $\alpha=1.5$.
+
+Firstly, for $N=100$ realizations we will have $M=10$ Pareto random variables in GCLT method and just as many uniform random variables in Series representation algorithm (tables 1 and 2).
+
+\begin{table}[h]
+\footnotesize
+\centering
+\caption{Results from J. Nolan's program for $\alpha=0.5$ }
+\begin{tabular}{l|llll}
+     & alpha  & beta   & gamma    & delta         \\ \hline
+CMS & 0.5588 & 0.1334 & 0.935257 & -0.455907E-02 \\
+GCLT &   0.4166 & 0.9900  &  2.81429 & 2.40858   \\
+Series & 0.5038 & -0.0851  &  2.09395   &   -0.228830
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\footnotesize
+\centering
+\caption{Results from J. Nolan's program for $\alpha=1.5$ }
+\begin{tabular}{l|llll}
+    & alpha  & beta   & gamma    & delta         \\ \hline
+CMS & 1.3465  &  0.5409  &   0.996354   &  -0.851943E-01\\
+GCLT &  1.1000  &  1.0000  &   0.920898     &    -1.97566 \\
+Series &  1.2506  &  0.0663   &   1.67297     &    0.254469
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+	\centering
+		\includegraphics[width=0.70\textwidth]{1pdf.eps}
+	\caption{\small Empirical probability density function
+	of $\alpha$-stable random variable with $\alpha=1.5,\ \beta=0,\ \sigma=1,\ \mu=0$.
+	}
+\end{figure}
+
+Secondly, we will do the same for $N=1000$ and $M=100$ (tables 3 and~4).
+
+
+\begin{table}[h]
+\footnotesize
+\centering
+\caption{Results from J. Nolan's program for $\alpha=0.5$ }
+\begin{tabular}{l|llll}
+     & alpha  & beta   & gamma    & delta         \\ \hline
+CMS & 0.4989 &  -0.0283     & 1.16850       & -0.275013E-01 \\
+GCLT &   0.4157   & 0.9900     & 3.39211         & 2.62628   \\
+Series & 0.5106 &   0.0173 &     1.69025        & 0.235211E-01
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\footnotesize
+\centering
+\caption{Results from J. Nolan's program for $\alpha=1.5$ }
+\begin{tabular}{l|llll}
+    & alpha  & beta   & gamma    & delta         \\ \hline
+CMS & 1.5824  & -0.0714 &    0.961941        & 0.300285E-01\\
+GCLT &   1.3000  &  1.0000     & 1.34874 &        -1.96660  \\
+Series & 1.4220   & 0.1020     & 1.67351        & 0.274653E-01
+\end{tabular}
+\end{table}
+
+Generalized Central Limit Theorem method with Pareto distribution is not really giving correct results for $\alpha=1.5$. None of the parameters is really close to the original value, especially $\sigma$ (gamma) and $\mu$ (delta), which are supposed to be equal to 1 and 0, respectively. $\beta$ parameter is close to $1$ for both $\alpha$'s. So we can say that the GCLT algorithm is the least accurate.
+
+The estimators of the other two generators are more accurate when the generated sample size is bigger.
+
+
+
+\section{Comparison in terms of speed}
+In this section we are going to use one set of parameters from the previous section to test and compare the speed of our three generators.
+
+We will take into consideration number of Pareto and uniform distribution random variables used in Generalized Central Limit Theorem and Series representation, respectively.
+
+So, we take the following parameters of $\alpha$-stable random variable
+\[\alpha=1.5,\ \beta=0,\ \sigma=1,\ \mu=0;\]
+lengths of the generated samples will be equal to
+$N=1$, $N=100$ and $N=1000$ and the number of Pareto and uniform random variables used in the algorithms is going to be $M=10$ and $M=100$.
+
+To make the results more accurate, we are using Monte Carlo method, namely we simulate our random variables 100 times and then take average for each generator used. The results are presented in table 5.
+
+\begin{table}[h]
+\footnotesize
+\centering
+\caption{Average speed (in seconds) of generating $N$ $\alpha$-stable random variables ($\times 10^{-3} $) }
+\begin{tabular}{ll|lll}
+N     & M  & CMS   & GCLT    & Series         \\ \hline
+1 & 10 & 0.161 &  0.1245  & 0.1653 \\
+1 & 100 & 0.1804  & 0.4408  & 0.4423 \\
+100 & 10 & 0.1076  & 0.08886  & 2.714 \\
+100 & 100 & 3.407  & 25.06 &  33.12 \\
+1000 & 10 & 0.1797  & 0.1095 &  5.095 \\
+1000 & 100 & 6.346  & 48.49 &  61.59
+\end{tabular}
+\end{table}
+
+We can easily observe that the Series representation algorithm is the slowest. And it seems that the GCLT algorithm is the fastest when it is using $M=10$ uniform random variables, instead of 100.
+
+However, the fastest algorithm is the Chambers-Mallows-Stuck algorithm, mainly because it doesn't rely on other distributions. The difference is really visible in the last row of table 5 (for $N=1000$ and $M=100$).
+
+\section{Conclusion}
+
+In this report we tested and compared accuracy and speed of three $\alpha$-stable random generators: Chambers-Mallows-Stuck algorithm, Generalized Central Limit Theorem method with Pareto distribution and Series representation. We observed that the GCLT method is the least accurate and that the CMS algorithm is the fastest.
+
+To sum up, Chambers-Mallows-Stuck algorithm is the best choice in terms of both speed and accuracy and it doesn't rely on any additional distributions.
+
+\end{document}

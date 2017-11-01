@@ -1,0 +1,215 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{Comparison of fractional Gaussian process generators}
+\author{Agnieszka Szkutek}
+\date{
+  \parbox{\linewidth}
+  {\centering%
+  June 2017
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  \endgraf\bigskip\endgraf\bigskip
+  Wroclaw University of Science and Technology
+  }}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In this report we are going to compare two generators of fractional Gaussian process, that use the following methods:
+\begin{enumerate}
+  \item Davies and Harte method,
+  \item Cholesky decomposition.
+\end{enumerate}
+
+We will compare them in terms of accuracy and speed. We will visualise the results, in particular plot trajectories and quantile lines. We will also measure and compare simulation times for both algorithms.
+
+
+
+\section{Comparison in terms of accuracy}
+In order to test how accurate the generators are, we are going to simulate $M=100$ realizations of fractional Gaussian process of length $N=1024$, with two different Hurst parameters, $H_1=0.3$ and $H_2 = 0.8$.
+
+\subsection{Davies and Harte method}
+First, we will focus on an algorithm that simulates fractional Gaussian noise for given $0< H <1$ by means of the Davies and Harte method that uses Fast Fourier Transform. 
+
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.6\textwidth]{dh1.eps}
+  \caption{\footnotesize 
+  % In the left part of the picture
+  Left: increments of 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$.
+  Right: increments of 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+\end{figure}
+
+From the increments we can calculate trajectories of a fractional Gaussian process. The trajectories are presented in fig. \ref{dh2}.
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{dh2.eps}
+  \caption{\footnotesize 
+  Left: 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$.
+  Right: 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+  \label{dh2}
+\end{figure}
+
+
+Now, we can calculate analytical and empirical quantile lines. In fig. \ref{dh3} both are presented in addition to the trajectories of the process.
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{dh3.eps}
+  \caption{\footnotesize 
+  Left: Analytical and empirical quantile line $q=0.9$ is presented alongside 
+  100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$ are presented.
+  Right: Analytical and empirical quantile line $q=0.9$ is presented alongside 
+  100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+  \label{dh3}
+\end{figure}
+
+To compare both quantile lines, we can plot them without the trajectories of the process. So then we obtain fig. \ref{dh4}.
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{dh4.eps}
+  \caption{\footnotesize 
+  Left: Analytical and empirical quantile line $q=0.9$.
+  Right: Analytical and empirical quantile line $q=0.9$.
+  }
+  \label{dh4}
+\end{figure}
+
+We can see that the empirical quantile line is closer to the analytical one for $H_1 = 0.3$. Both empirical quantile lines are quite close to their analytical counterparts, even though we use only 100 trajectories to calculate them.
+
+
+
+
+
+
+\subsection{Cholesky decomposition}
+ Now we will go the the algorithm that uses Cholesky decomposition to obtain trajectories of fractional Gaussian process of length $N=1024$. As previously, we will consider two different Hurst parameters, $H_1=0.3$ and $H_2 = 0.8$.
+
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{c2.eps}
+  \caption{\footnotesize 
+  Left: 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$.
+  Right: 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+  \label{c2}
+\end{figure}
+
+From the trajectories we can calculate increments to compare with increments obtained with the previous algorithm. The increments are presented in fig. \ref{c2}.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.6\textwidth]{c1.eps}
+  \caption{\footnotesize 
+  % In the left part of the picture
+  Left: increments of 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$.
+  Right: increments of 100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+\end{figure}
+
+
+Now, we can calculate analytical and empirical quantile lines. In fig. \ref{c3} both are presented in addition to the trajectories of the process.
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{c3.eps}
+  \caption{\footnotesize 
+  Left: Analytical and empirical quantile line $q=0.9$ is presented alongside 
+  100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_1=0.3$ are presented.
+  Right: Analytical and empirical quantile line $q=0.9$ is presented alongside 
+  100 trajectories of fractional Gaussian process of length $N=1024$ with self-similarity parameter $H_2=0.8$.
+  }
+  \label{c3}
+\end{figure}
+
+To compare both quantile lines, we can plot them without the trajectories of the process. So then we obtain fig. \ref{c4}
+
+\begin{figure}[H]
+  
+  \centering
+    \includegraphics[width=0.6\textwidth]{c4.eps}
+  \caption{\footnotesize 
+  Left: Analytical and empirical quantile line $q=0.9$.
+  Right: Analytical and empirical quantile line $q=0.9$.
+  }
+  \label{c4}
+\end{figure}
+
+We can see that both empirical quantile lines are quite close to their analytical counterparts.
+
+
+
+
+
+\section{Comparison in terms of speed}
+In this section we are going to compare the speed of our two generators. The results of simulating $M = 1$, 100, 1000, 10000 and 1000000 trajectories with self-similarity parameters $H_1=0.3$ and $H_2 = 0.8$ are presented in the tables \ref{tab:speed03} and \ref{tab:speed08} respectively.
+
+\begin{table}[H]
+
+\footnotesize
+\centering
+\caption{Speed (in seconds) of generating $M$ trajectories of fractional Gaussian process of length $N=1024$ for $H_1=0.3$}
+\label{tab:speed03}
+\begin{tabular}{l|lllll}
+M    & 1 & 100   & 1000  & 10000   & 1000000     \\ \hline
+Davies and Harte  & 0.00109601  & 0.082078 & 0.820176 & 8.13376 & 803.312 \\
+Cholesky          & 13.8556     & 13.9526  & 14.0207 & 15.2414 & out of memory
+\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+
+\footnotesize
+\centering
+\caption{Speed (in seconds) of generating $M$ trajectories of fractional Gaussian process of length $N=1024$ for $H_1=0.8$}
+\label{tab:speed08}
+\begin{tabular}{l|lllll}
+M    & 1 & 100   & 1000   & 10000 & 1000000      \\ \hline
+Davies and Harte  & 0.00155687  & 0.0975978 & 0.80119 & 7.99506 & 799.0251 \\
+Cholesky          & 13.9883     & 13.9317  & 14.0216 & 15.238  & out of memory
+\end{tabular}
+\end{table}
+
+It is easy to see that the algorithm that uses Cholesky decomposition works more or less in constant time for number of trajectories less than $10^6$. The time increases by 1 second when number of trajectories increases 10 times. 
+
+Simulation time of the algorithm that uses Davies and Harte method to produce increments is proportional to the number of trajectories. 
+The time increases 10 times if number of trajectories increases 10 times. 
+
+Also, Davies and Harte method works much faster than the one using Cholesky decomposition, at least for number of trajectories less or equal 10000. 
+
+In the case of number of trajectories equal to 1000000, Davies and Harte method is able to produce results, however my computer doesn't have enough memory for the matrix used in Cholesky algorithm. 
+
+
+\section{Conclusion}
+
+To conclude, both Davies and Harte method and Cholesky decomposition produce accurate trajectories of fractional Gaussian process. The first method uses less resources than the second one, and is faster. Also, Davies and Harte method was able to produce results for number of trajectories equal to $10^6$, when the Cholesky decomposition algorithm failed.
+
+
+\end{document}

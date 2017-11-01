@@ -1,0 +1,430 @@
+
+MVSTABLE (Version 2.0, 15 March 2000)
+-------------------------------------
+
+
+Written by :    John Nolan (jpnolan@american.edu)
+                Math/Stat Department
+                American University
+                Washington, DC 20016-8050
+                http://www.cas.american.edu/~jpnolan
+
+MVSTABLE computes stable densities p(x,y), generates stable random
+vectors and fits data sets with a two dimensional stable distribution.
+The program starts up in a window, asks what you want to do, and
+writes output to file mvstable.out in the current directory.  The
+following directions are rough, and assume you know about stable
+vectors, spectral measures, etc.  Also, graphical output is rough -
+you should use the output data in mvstable.out and produce quality
+graphs in a statistical program, e.g. S-Plus, or a spreadsheet.
+
+The algorithms used have been developed over several years and published
+in different places.  See the appropriate section for references.
+
+The program now requires a parameter, iparam, to distinguish which
+parameterization is being used.  Possible values for the program
+are 0 and 1.  The meanings of these parameterizations are described
+in the forthcoming book, Stable Distributions, Nolan (2002).
+In the symmetric case, iparam=0 and iparam=1 coincide.  In the
+asymmetric case, only iparam=1 is currently implemented.
+
+--------------------------------------------------------------------------
+1. Computing stable densities.
+--------------------------------------------------------------------------
+
+For symmetric distributions, the density is evaluated by using formulas from
+"Multivariate stable densities as functions of one-dimensional projections",
+H. Abdul-Hamid and J. Nolan, J. of Multivariate Analysis, 67, 80-89 (1998).
+For asymmetric distributions, the density is evaluated using the
+program described in "Calculation of multidimensional stable densities",
+J. P. Nolan and B. Rajput, Commun. Statistics-Simula. 24, 551-566 (1995).
+
+The program works well for alpha > 1 and for small to moderate values of
+(x,y).  Tests have shown 4 or 5 significant digits of accuracy.  Note this
+is absolute accuracy, not relative accuracy.  No claims for accuracy are made
+for small alpha (where p(0,0) will get large) or for large values
+of (x,y) (where p(x,y) will be small).  WARNING: this means it is possible
+for negative values of the density to be returned if p(x,y) is small,
+say < 0.0001.
+
+MVSTABLE density calculations have been tested in 3 ways:
+ - in the independent case: use the 1-dim. program STABLE to compute p(x)
+   and p(y) and then compare p(x)p(y) to p(x,y);
+ - in the isotropic case, p(0,0) = gamma(2/alpha)/(2*pi*alpha);
+ - in the isotropic case: compare output to an earlier program from
+   H. Abdul-Hamid's dissertation at American University.
+
+For the symmetric case, you must specify alpha, a definition of the
+"scale function" gamma(t),
+a shift vector mu, and a grid of x, y values where you wish to compute the
+density.  The scale function gamma(t) is the alpha-th root of minus
+the logarithm of the joint characteristic function at t.  Equivalently,
+it is the scale parameter of the projection of the bivariate symmetric
+stable r. vector in the t direction.  The program currently supports
+three types of gamma(t): isotropic/radially symmetric, discrete
+spectral measure, and sub-Gaussian.  If you want a different
+type of gamma, please let me know and I will try to add it for you.
+
+In the asymmetric case, you must specify alpha, and a discrete
+spectral measure.
+
+
+
+Input file format for spectral measure
+--------------------------------------
+
+Numbers can be typed in any reasonable format, no fixed columns are used.
+WARNING: THE DATA FILE MUST END WITH A NULL/EMPTY LINE, otherwise
+the last line of data will be ignored.
+
+alpha  (index of stability)
+iparam (parameterization choice)
+gamma type  (1,2, 3, or 4 - see below)
+<definition of gamma: depends on gamma type>
+mu     (shift vector)
+start, stop, step value for x grid
+start, stop, step value for y grid
+
+The program loops, so multiple computations can be done in one run.
+If the alpha value is the same, subsequent calculations will be very
+fast.
+
+
+Sample input
+------------
+
+(1) Isotropic case (gamma type = 1)  This example computes densities for the
+isotropic case with gamma(t) = constant.  Specify gamma type = 1 and a value
+for the constant on the next line:
+
+1.2         (alpha)
+1           (iparam)
+1           (gamma type)
+1           (constant value of gamma(t))
+0 0         (shift vector)
+0 3 1       (x grid from 0 to 3 step 1)
+0 0 1       (y grid from 0 to 0 step 1)
+
+Sample output is listed below for this and other cases.
+
+(2) Discrete spectral measure (gamma type = 2). If gamma type = 2, the
+program assumes the distribution is symmetric and uses the faster algorithm.
+(Use gamma type = 4 for asymmetric case.) The example below computes
+densities corresponding to the independent components case.  Specify gamma
+type = 2, then n=the number of point masses in the spectral measure, then a
+list of (theta(i),gamma(i)), i=1,...n. Here theta is the location of the
+delta measure/point mass in degrees (not radians).
+
+1.2         (alpha)
+1           (iparam)
+2           (gamma type)
+2           (2 point masses)
+0  1        (first point mass is at (1,0) with weight 1)
+90 1        (second point mass is at (0,1) with weight 1)
+0 0         (shift vector)
+0 3 1       (x grid from 0 to 3 step 1)
+0 3 1       (y grid from 0 to 3 step 1)
+
+Note that only two point masses are needed because we specified that
+the distribution is symmetric.
+
+(3) Sub-Gaussian/elliptical case (gamma type = 3).  This example computes
+pdf for a sub-Gaussian stable r. vector with characterstic function given
+by a covariance matrix (R(i,j)) as in equation (2.5.4) of Samorodnitsky and
+Taqqu, pg. 78.  This particular example will give exactly the same
+results as (a), because the covariance matrix R=2*I, I=identity matrix.
+(Note that eq. (2.5.4) has a factor of 1/2 in it.  In general, to get
+the same answer as isotropic with gamma(t)=k, use R=2*k^2*I.)
+
+1.2         (alpha)
+1           (iparam)
+3           (gamma type)
+2 0         (first row of covariance matrix)
+0 2         (second row of covariance matrix)
+0 0         (shift vector)
+0 3 1       (x grid from 0 to 3 step 1)
+0 3 1       (y grid from 0 to 3 step 1)
+
+(4) Discrete nonsymmetric spectral measure (gamma type = 4).
+The example below computes densities corresponding to the totally
+skewed, independent components case.  Specify gamma
+type = 4, then n=the number of point masses in the spectral measure, then a
+list of (theta(i),gamma(i)), i=1,...n. Here theta is the location of the
+delta measure/point mass in degrees (not radians).
+
+1.6         (alpha)
+1           (iparam)
+4           (gamma type)
+2           (2 point masses)
+0  1        (first point mass is at (1,0) with weight 1)
+90 1        (second point mass is at (0,1) with weight 1)
+0 0         (shift vector)
+0 3 1       (x grid from 0 to 3 step 1)
+0 3 1       (y grid from 0 to 3 step 1)
+
+
+-----------------------------------------------------------------------------------
+Sample output from above test cases
+-----------------------------------------------------------------------------------
+
+ MVSTABLE  2.01 (2001/03/26)    1    Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  3/29/2001        09:39:38.54
+
+
+ Bivariate stable pdf using mvdpf
+ Spectral measure read from file: spmeas1.dat
+
+      alpha=  1.20   iparam=  1   gamtyp=  1
+
+      Isotropic/radially symmetric gamma(t) =      1.0000
+
+      shift vector=      0.0000         0.0000
+      x grid     0.0000     to      3.0000     step      1.0000
+      y grid     0.0000     to      0.0000     step      0.0000
+   3/29/2001        09:39:47.66
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          0.11973031
+       1.0000000           0.0000000          0.61469897E-01
+       2.0000000           0.0000000          0.17389149E-01
+       3.0000000           0.0000000          0.56370478E-02
+   3/29/2001        09:39:50.13
+
+
+ Bivariate stable pdf using mvdpf
+ Spectral measure read from file: spmeas2.dat
+
+      alpha=  1.20   iparam=  1   gamtyp=  2
+
+      Discrete symmetric spectral measure:
+
+           theta     lambda=point mass
+       1   0.000     1.0000
+       2  90.000     1.0000
+
+      shift vector=      0.0000         0.0000
+      x grid     0.0000     to      3.0000     step      1.0000
+      y grid     0.0000     to      3.0000     step      1.0000
+   3/29/2001        09:39:55.13
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          0.89652372E-01
+       0.0000000           1.0000000          0.54184663E-01
+       0.0000000           2.0000000          0.21534324E-01
+       0.0000000           3.0000000          0.96741297E-02
+       1.0000000           0.0000000          0.54184663E-01
+       1.0000000           1.0000000          0.32748466E-01
+       1.0000000           2.0000000          0.13015050E-01
+       1.0000000           3.0000000          0.58469111E-02
+       2.0000000           0.0000000          0.21534324E-01
+       2.0000000           1.0000000          0.13015050E-01
+       2.0000000           2.0000000          0.51725026E-02
+       2.0000000           3.0000000          0.23237070E-02
+       3.0000000           0.0000000          0.96741297E-02
+       3.0000000           1.0000000          0.58469111E-02
+       3.0000000           2.0000000          0.23237070E-02
+       3.0000000           3.0000000          0.10439075E-02
+   3/29/2001        09:39:57.66
+
+
+ Bivariate stable pdf using mvdpf
+ Spectral measure read from file: spmeas3.dat
+
+      alpha=  1.20   iparam=  1   gamtyp=  3
+
+      Subgaussian with covariance matrix
+                  2.00000        0.00000
+                  0.00000        2.00000
+
+      shift vector=      0.0000         0.0000
+      x grid     0.0000     to      3.0000     step      1.0000
+      y grid     0.0000     to      3.0000     step      1.0000
+   3/29/2001        09:40:02.98
+
+              x                   y              p(x,y)
+       0.0000000           0.0000000          0.52115646E-01
+       0.0000000           1.0000000          0.38081059E-01
+       0.0000000           2.0000000          0.18091037E-01
+       0.0000000           3.0000000          0.77672697E-02
+       1.0000000           0.0000000          0.38081059E-01
+       1.0000000           1.0000000          0.28874482E-01
+       1.0000000           2.0000000          0.14810933E-01
+       1.0000000           3.0000000          0.68032100E-02
+       2.0000000           0.0000000          0.18091037E-01
+       2.0000000           1.0000000          0.14810933E-01
+       2.0000000           2.0000000          0.89565197E-02
+       2.0000000           3.0000000          0.47990419E-02
+       3.0000000           0.0000000          0.77672697E-02
+       3.0000000           1.0000000          0.68032100E-02
+       3.0000000           2.0000000          0.47990419E-02
+       3.0000000           3.0000000          0.30160014E-02
+   3/29/2001        09:40:05.51
+
+
+ Bivariate stable pdf using mvdpf
+ Spectral measure read from file: spmeas4.dat
+
+      alpha=  1.60   iparam=  1   gamtyp=  4
+
+      Discrete general (asymmetric) spectral measure:
+
+           theta        lambda=point mass
+       1   0.000     1.0000
+       2  90.000     1.0000
+
+      shift vector=      0.0000         0.0000
+      x grid     0.0000     to      3.0000     step      1.0000
+      y grid     0.0000     to      3.0000     step      1.0000
+   3/29/2001        09:40:18.31
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          0.53339763E-01
+       0.0000000           1.0000000          0.29894007E-01
+       0.0000000           2.0000000          0.14280897E-01
+       0.0000000           3.0000000          0.68110351E-02
+       1.0000000           0.0000000          0.29894007E-01
+       1.0000000           1.0000000          0.16853117E-01
+       1.0000000           2.0000000          0.80034996E-02
+       1.0000000           3.0000000          0.38566838E-02
+       2.0000000           0.0000000          0.14280897E-01
+       2.0000000           1.0000000          0.80034996E-02
+       2.0000000           2.0000000          0.37770021E-02
+       2.0000000           3.0000000          0.18487809E-02
+       3.0000000           0.0000000          0.68110351E-02
+       3.0000000           1.0000000          0.38566838E-02
+       3.0000000           2.0000000          0.18487809E-02
+       3.0000000           3.0000000          0.89741042E-03
+   3/29/2001        09:40:18.53
+------------------------------------------------------------------------
+
+
+Some technical notes
+--------------------
+
+(a) Description of the algorithm in the symmetric case:
+The Abdul-Hamid and Nolan paper cited above gives the 2-dim.
+density as an integral over the
+unit circle of a particular function, called g(v;alpha).  (In the
+notation of the paper, g^{sym}_{\alpha,2}(v).)   The main advantage
+of this is that g depends only on alpha, and not on the scale function
+or on the (x,y) values.
+
+For efficiency reasons, the program precomputes the g(v;alpha) function
+on a grid of v values.  The integral for g is numerically
+evaluated using IMSL routine DQDAWF in routine g2d.
+
+Next a cubic spline interpolation for g is calculated so that future
+calculations are fast.  The function g2dcs returns cubic spline
+approximation to g2d.
+
+The gamma(t) function is computed in function gammaf by using the input
+values specified.
+
+For a given (x,y) value, p(x,y) is evaluated by numerically integrating
+2*g(v(t);alpha)/gamma(t)^d for 0 < t < pi, where
+v(t) =  ((x-mu(1))*t(1)+(y-mu(2))*t(2) )/gamma(t).  The IMSL routine
+DQDAQ is used for the numerical integration, making repeated calls
+to g2dcs.
+
+MVSTABLE will not work well when alpha is small.  The program prints
+out a warning anytime alpha is less than 1, though it is probably
+accurate for alpha as small as 1/2.
+
+MVSTABLE will not work well if x^2+y^2 is large: an error message like:
+
+ ***WARNING*** Accuracy problem: v exceeded vmax   80 times: 60.0  1.0
+
+This means evaluating the density at x=60,y=1 required values of
+g(v) for v larger than the pretabulated values in g2dcs.  This
+will usually only affect the 4th or 5th decimal place of the
+results.  At this point, the calculations are not much more
+accurate than this anyhow, so I have not tried to improve the
+code.
+
+(b) Description of the algorithm in the asymmetric case is in the
+Nolan and Rajput paper.
+
+
+--------------------------------------------------------------------------
+2. Simulating stable random vectors.
+--------------------------------------------------------------------------
+
+This part of the program generates bivariate stable random vectors
+from stable distributions having a discrete spectral measure.
+See  "A method for simulating stable random vectors",
+Modarres and Nolan, Computational Statistics, 9, 11-19 (1994).
+
+Input format:
+ngen = number of vectors to generate
+alpha = index of stability
+n = number of point masses in the spectral measure
+symmtrc = boolean/logical indicator of whether the measure is symmetric (T=true,F=false)
+shift vector - (x,y) to translate the distribution
+enter angle (in degrees) and weight - location and size of point mass
+
+Example - generate 1000 bivariate symmetric stable vectors with alpha=1.3 and
+independent components:
+1000 1.3 2 T
+0 0
+0  1
+90 1
+
+
+
+--------------------------------------------------------------------------
+3. Fitting data set with a stable distribution.
+--------------------------------------------------------------------------
+
+Fit a bivariate data set with a stable distribution with discrete spectral measure.
+The original work is described in "Estimating stable spectral measures" by
+Nolan, Panorska and McCulloch, (1996, submitted).  The diagnostics are described in
+"Data analysis for heavy tailed multivariate samples", Nolan and Panorska,
+Communications in Statistics - Stochastic Models, 11, 687-702 (1997)
+
+Directions for running
+----------------------
+
+Prepare the input file: should have 2 numbers per line,
+ the last line should have 2 numbers, followed by a space.
+ Do not leave out this space (or have a blank line at the end of the file),
+ otherwise the last line of input will be ignored.
+
+1. Choose fit a bivariate sample
+2. specify input filename
+3. program allows EDA on projections - enter the projection angle
+   and follow questions. CTRL-Z will end this loop.
+4. Enter # of point masses in spectral measure.  Must be a multiple
+   of 4, suggest starting with 40, increase to 100 and see if any
+   difference.
+5. Program allows you to plot spectral measure.
+6. Program allows you to plot alpha(t),gamma(t),beta(t).
+7. Loop to 4, CTRL-Z stops the program.
+
+The results are in the output file mvstable.out.
+
+Output of an estimation, perhaps with some thresholding to eliminate
+small masses, can be used as input to the pdf calculations or simulation
+routine above.
+
+A minimal run, assuming the data is in file test.dat and without
+diagnostics, is run mvstable.exe, and use:
+
+    3  (estimate spectral measure)
+    test.dat   (data file name)
+    CTRL-Z  (skip the diagnostics)
+    40  (number of point masses)
+    N (skip plots)
+    N (skip plots of projection functions)
+    CTRL-Z (skip further estimation)
+    CTRL-Z (exit the program)
+
+If you want to see more diagnostics, you can choose other options when queried.
+At the next to the last step above, you can repeat the estimation with a
+different number of point masses.  If you choose to show graphs, press the
+ENTER key to go on to the next graph/input.
+
+If you want to generate test data, use part 2. of the program to simulate data.
+
+
+--------------------------------------------------------------------------
+If you find problems, please let me know.     John Nolan

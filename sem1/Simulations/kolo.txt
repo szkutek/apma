@@ -1,0 +1,69 @@
+1. 
+Beta \in [−1, 1] is called the skewness parameter. In this context the usual skewness is not well defined, as for alpha < 2 the distribution does not admit 2nd or higher moments, and the usual skewness definition is the 3rd central moment.
+
+2.
+No, they have to be independent and alpha parameter has to be the same
+
+3.
+
+GCLT 
+- 1 < alpha < 2
+- uses other distr. with heavy tails, eg. Pareto
+- approximation
+- summation slows it down and can produce large numbers
+
+CMS algorithm
+- 0 < alpha <= 2
+- we simulate X~S_alpha (1, beta, 0) and then multiply by sigma and add mu
+- different formulas for alpha = 1 and alpha != 1
+- uses other distr. - uniform, exponential
+- no loops, but lots of calculations of trigonometric functions
+
+Series representation
+- 0 < alpha < 2
+- truncation of sum from inf to some const M, so approx.
+- uses other distr. 
+- produces only symmetrical r.v. (beta=0, sigma=0)
+
+4. 
+
+integral (spectral) representation
+- approx. 1 - truncated interval from R to [M1, M2]
+- approx. 2 - sum instead of integral
+- time consuming - lots of calc. on f(s) and ksi_i
+
+series representation
+- exact series formula
+- approx. - truncated sum from [1,inf) to [1,M)
+
+5. 
+
+Hosking
+Cholesky
+Davies and Harte
+
+6. 
+(If it's concentrated on a unit sphere, then ) ?
+(X1, .., Xd) can be expressed as a linear transformation of independent alpha-stable random variables.
+
+7. - na kartce
+it's a symmetric stable vector
+
+8. 
+No, only when Sigma (cov. matrix) is positive and symmetric???
+
+9.
+Davies and Harte method produces increments.
+
+10. 
+positive semi-definite and symmetric.
+
+11.
+We have self-similar process with stationary increments with Hurst index H > 0.5. Then it's increments create a stationary long range dependence sequence.
+
+12. b
+
+13.
+To simulate general Levy process, algorithm for a-stable Levy motion can be extended. We only need to identify the distribution of increments ksi_i.
+
+14. 

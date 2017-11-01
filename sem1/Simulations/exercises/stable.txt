@@ -1,0 +1,452 @@
+
+    Users guide for STABLE 4.0.xx (for Windows, 12 July 2006)
+
+        John P. Nolan
+        Math/Stat Department
+        American University
+        Washington, DC 20016  USA
+        e-mail: jpnolan@american.edu
+        voice:  202.885.3140
+
+The program calculates the density (pdf), cumulative distribution
+function (cdf), and quantiles for a general stable distribution.
+These routines are based on the formulas in "Numerical calculation
+of stable densities and distribution functions", J. P. Nolan,
+Commun. Statist.-Stochastic Models, 13(4), 759-774 (1997).
+Also included is a version of Chambers, Mallows and Stuck's
+algorithm to generate stable random variates.
+
+It also performs maximum likelihood estimation of
+stable parameters and some exploratory data analysis techniques
+for assessing the fit of a data set.  This work is described in
+the paper "Maximum likelihood estimation of stable parameters",
+J. P. Nolan, in the book Levy Processes, Ed. by Barndorff-Nielsen,
+Mikosch and Resnick, Birkhauser, 2001 (currently on my webpage).
+
+Version 3.03 incorporates all previous changes, in particular the
+significantly increased accuracy from version 2.11 of the
+calculations.  Computations are now accurate for 0.2 <= alpha <= 2.0.
+(Below alpha = 0.2, the granularitiy of double precision
+numbers becomes a problem.)  Version 3.03 includes numerous
+internal changes, the main visible ones are:
+  - improved output formatting
+  - 95% confidence intervals are given for maximum likelihood
+    estimates of stable parameters
+  - improved error handling/reporting.  The emphasis is on
+    detecting and reporting errors, not error correction or
+    detailed explanations.  If something doesn't make sense,
+    please contact me by e-mail.
+  - numerical computation of g(x)=-f'(x)/f(x), the score
+    function for the location parameter, also called the "nonlinear"
+    function in signal processing.
+
+Included in the program is code to quickly approximate stable
+densities.  This routine is much faster than the
+regular density calculations: approximately 1 million density
+evaluations/second can be performed on a 1 GHz Pentium.  This allows
+maximum likelihood estimation of all 4 stable parameters in less than
+a second for data sets having thousands of points.
+
+Error detection and handling has been improved in the core routines,
+but the driver routine does not do careful checking - you can
+still crash the program with bad input.
+
+Note that STABLE uses exact formulas whenever they are available,
+e.g. the Gaussian (alpha=2), Cauchy (alpha=1, beta=0) and Levy
+(alpha=1/2,beta=1 or -1) cases.  This version of STABLE also has a
+loop in it to slow it down and discourage commercial use of this
+free software.
+
+
+Parameter meanings
+------------------
+
+Stable distributions are described by 4 parameters, which the
+program calls:
+  alpha = index of stability, in the range (0,2]
+  beta  = skewness, in the range [-1,1]
+  gamma = scale, in the range (0,infinity)
+  delta = location, in the range (-infinity,+infinity)
+
+In previous versions of this program, gamma was called sigma and
+delta was called mu.  Non-mathematical users were invariably
+confused between these parameters and the mean and standard
+deviation (the standard deviation exists only when alpha=2,
+in which case it is NOT gamma, the mean exists only when
+alpha >1, in which case it will agree with delta only in
+the 1-parameterization, see below).  Giving them different
+names may minimize such problems.
+
+There are different meanings for these parameters, depending on
+what notation you are using.  The program STABLE has 4 parameterizations
+built into the program:
+
+ 0. "S0" parameterization: based on the (M) representation
+    of Zolotarev for an alpha stable distribution with skewness
+    beta. Unlike the Zolotarev (M) parameterization, gamma and delta
+    are straightforward scale and shift parameters. This
+    representation is continuous in all 4 parameters, and gives an
+    intuitive meaning to gamma and delta that is lacking in other
+    parameterizations.
+ 1. "S" or "S1" parameterization: the parameterization used by Samorodnitsky
+    and Taqqu in the book Stable Non-Gaussian Random Processes.
+    It is a slight modification of Zolotarev's (A) parameterization.
+    The S0 and S1 parameterization agree in the symmetric case (beta=0),
+    but differ by a shift in the nonsymmetric case.
+ 2. "S*" or "S2" parameterization: a modification of the S0 parameterization
+    which is defined so that
+      - the scale gamma agrees with the Gaussian scale (standard dev.)
+        when alpha=2 and the Cauchy scale when alpha=1.
+      - the mode is exactly at delta.
+ 3. "S3" parameterization: an internal parameterization.
+    The scale is the same as the S2 parameterization, the shift is
+    -beta*g(alpha), where g(alpha) is defined in the paper just below.
+
+The paper "Parameterizations and modes of stable distributions",
+Statistics and Probability Letters, 38, 187-195 (1998) describes
+the S0, S1 and S2 parameterizations.
+
+All computations are done in the S0 parameterization, which is better
+suited to numerical calculations and modeling data than the
+standard representations.  Unless you have a specific reason to
+use a different parameterization, I suggest that you use the S0
+one.  Conversions are done if you request a different parameterization.
+
+
+
+What do you need?
+-----------------
+
+STABLE runs on a PC type computer under Windows 95/98/NT/2000/XP.
+The program is written in Digital/Compaq Visual Fortran.
+To run the program, you need the file STABLE.EXE
+
+While you can run the program from a floppy disk, you will get faster
+results if you copy the program to a hard disk and execute from there.
+Start the program from "Run" on the "Start" menu by using "Browse" to
+locate STABLE.EXE in the appropriate directory.  Or from a DOS prompt,
+cd to the directory where the program is and type STABLE.  You will
+be asked to select what you want to do: calculate densities, cumulative
+distribution functions, etc.  After that, you will be prompted for
+various values, e.g. range of parameters alpha, beta, gamma and delta,
+and the range of x values. Most prompts are straightforward.
+All output is written to the file STABLE.OUT in the current directory.
+
+The program allows you to specify a range of parameter values, say
+vary alpha from 0.5 to 1.5 through steps of 0.25, beta through
+-1 to 1 through steps of 0.5 and x from -5 to 5 through steps of
+0.1.
+
+When graphing output, the program does not pause after each graph
+(unlike earlier versions of STABLE).  When all graphs are presented,
+you will hear a beep.  Press the enter key once, and you will return
+to the program prompt. The graphics were developed on a SVGA monitor
+and may not work on other hardware.  The graphing routines are not
+intended to do high quality graphics, only to visualize densities
+and distribution functions quickly.  If you want better quality
+graphics, write the output to a file and run your preferred graphics
+program on that data file.  The vertical scaling on the graph is done
+automatically in a way that guarantees there will be no overflow,
+but may not show your results clearly if you are far from the mode.
+
+
+SAMPLE RUNS
+-----------
+
+1. Computing stable densities.
+
+The following shows how to compute the density for a stable
+distribution with alpha=1.2 and beta ranging through -1, -0.5, 0,
+0.5, and 1 and the output is graphed on the screen.
+
+   Select
+     1 for pdf calculations
+     2 for cdf calculations
+     3 for quantile calculations
+     4 for generating stable random variates
+     5 for setting internal tolerances for the calculations
+     6 for comparison of quick pdf and pdf calculations
+     7 for fitting a sample with stable parameters
+     8 for computing -f'/f
+   Enter choice:  1
+   Enter parameterization: 0 for S0, 1 for S, 2 for S* : 0
+   Enter first alpha, last alpha and alpha stepsize: 1.2 1.2 0
+   Enter first beta, last beta and beta stepsize: -1 1 0.5
+   Enter first x, last x and x stepsize: -5 5 0.1
+   Enter gamma and delta: 1 0
+   Output destination (0=graph,1=screen,2=write to file): 0
+
+(graphs appear on the screen, pausing for you to press the enter
+key at the end.)
+
+The program loops back to the first question.  Enter end-of-file
+(CTRL-Z on a PC) to stop gracefully.
+
+Note that you can choose a sequence of alpha and beta values, e.g.
+   Enter first alpha, last alpha and alpha stepsize: 1.2 1.6 .2
+will use alpha=1.2, alpha=1.4 and alpha=1.6.  If you only want a
+single value, do as in the example above.
+
+If you want to produce a good graph for inclusion in a paper,
+you will have to write the output to a file (choice 2 to the last
+question/prompt), and read that output into a program that produces
+graphs - Excel, R, matlab, Mathematica, etc.
+
+
+2. Computing stable cumulative d.f. is similar to 1.
+
+3. Computing stable quantiles is similar to 1.
+   Quantile computations are slow because a numerical search
+   for each quantile is performed by repeated evaluation of the cdf.
+
+4. Generating stable random variables
+
+The first prompt asks for the parameterization you want to use.
+Then you are prompted for
+
+   n     = # of values to generate
+   iseed = starting seed for the random number generator.  A value of
+           -1 uses a random seed, any other value will generate a sequence
+           that can be regenerated later by specifying the same seed
+   alpha = index of stability
+   beta  = skewness
+   gamma = scale parameter (meaning depends on parameterization)
+   delta    = location parameter (meaning depends on parameterization)
+
+For example, entering
+  1000 -1 1.4 0 1 0
+will generate 1000 standardized symmetric alpha=1.4 stable variates.
+Values are generated using the Chambers, Mallows and Stuck algorithm
+(corrected) and transformed to the desired parameterization.
+As always, the output goes to the file STABLE.OUT, where it can
+be edited for other use (e.g. to test parameter estimation).
+
+5. Setting internal tolerances.
+
+Experienced users may want to change tolerances used by STABLE.
+This choice shows the internal values used by STABLE and allows you to
+change them.  You can speed up the programs by altering these
+values, but you will generally lose accuracy.  The program starts with
+tolerance values that attempt to get close to full double precision
+accuracy in the numerical evaluations of the integrals involved in
+the program.  This means calculations will be slower, but highly accurate.
+The exact meanings of each tolerance are given in the technical
+documentation.
+
+The main use of this feature was to speed up likelihood calculations.
+Now that there is an interpolation routine to compute densities
+and likelihoods quickly, there is little reason for an average user
+to change these values.
+
+WARNING: the tolerances control only the accuracy of the integral
+evaluation in the program.  In certain cases of cdf evaluation,
+the value of the computed integral is added or subtracted from
+a constant and subtractive cancelation can lower the accuracy
+of the final result.  See Theorem 1 in the "Numerical calculation
+of stable..." paper cited above for when this occurs.
+
+6. Comparing pdf and quick pdf calculations
+
+This option allows you to compare the density values computed by
+the integral representation to the one computed by the
+interpolation.  At the cost of a large array of coefficients,
+the interpolation is highly accurate over most values of the
+parameter space.  This part of the program lets you compare the
+two calculations to detect any problems in the interpolation
+scheme.  Note that the interpolation program is limited to
+alpha > 0.4.  Near the boundary of the parameter space
+(beta +1/-1, alpha very close to 2, x on the tail of a
+highly skewed distribution), the interpolation can
+be inaccurate.  See note 6 at bottom.
+
+7. Fitting a sample with a stable distribution
+
+You will first be asked to supply the file name of the input file.
+(If the file is not in the working directory, you will need to
+specify its complete filename, including directory.)
+The program reads one value per line from the input file in
+plain ascii text format.  Because of the way Visual
+Fortran reads free form input, the last data value should be
+followed by a carriage return. Without this return,
+STABLE will miss the last data value.  NOTE: the data
+should be one column of values, containing only the numeric
+values you want to analyze.  Coded files from Excel, SAS, etc.
+will not work - use only plain ascii.
+
+All output is displayed on both the screen and the output
+file, so you do not have to copy results from the screen.
+Some descriptive statistics will be displayed and you will
+be prompted for what kind of fit you want.  The options are
+maximum likelihood fit, quantile fit of McCulloch, sample
+characteristic method of Koutrovelis-Kogon-Williams, user
+supplied parameters, and  normal fit.  We will focus on the
+maximum likelihood fit, the others are straightforward.
+
+After choosing maximum likelihood fit, you will be asked
+if you want to take all defaults and do a fast search.
+Normally, you would type "Y" and the parameters are
+estimated for you automatically.  If you do not type
+"Y", a series of questions are asked.  First, you are asked what
+method you want to use.  Normally you should choose option
+3: approximate gradient search with QKSPDF.  This is the
+fastest method and simulation studies (technical report in
+preparation) show it is highly accurate.
+
+If you end up with a fit that is near a boundary of the parameter
+space, you may want to recompute the estimates using the slower
+direct search or possibly even the direct search with
+(slow) pdf calculations.  See note 6 at bottom for more
+information.
+
+After selecting the method, the quantile estimates are computed
+to use as an initial estimate of the parameters.  You will then
+be prompted for the bounds of the four parameters (alpha, beta,
+gamma and delta) in the search.  General limits are given in
+parenthesis at each prompt.  The safest thing is to use these
+bounds, but if you know a priori that you want to restrict the
+bounds, you may do so.  If you do restrict the range and the
+resulting parameter estimates are near the boundary you specify,
+you should rerun your search with wider bounds to see if the new
+search goes outside your original bounds.  If you want to restrict
+some parameter to be a specified value, say beta=0 because you
+believe you have a symmetric stable, you cannot just enter upper
+and lower bounds of 0.  The search routine will not work correctly
+with any parameter interval having zero width.  You can trick the
+search routine by using distinct values for the bounds like -.001
+and +0.001, which will make little practical difference.
+Note: if alpha < 0.4, the quick pdf routine will not work and the
+(regular/slow) pdf routine becomes unreliable.
+
+The program will then numerically maximize the likelihood using the
+method you selected.  For default (method 3), this takes a few seconds
+for a data set of size 1,000.  (Method 1 takes several times as long,
+methods 2 and 3 may take hours.)  The resulting parameter values
+are then displayed on the screen in all 3 parameterizations.
+The program prints out the half width of 95% confidence intervals,
+e. g. the term printed is the amount to add and subtract from
+each parameter estimate to obtain the confidence interval.
+
+Then you will be asked if you want to run some exploratory data
+analysis to assess the stable fit.  Answer "Y" for yes and you
+will be prompted for values.  Again, results are written on the
+output file STABLE.OUT for later reference.  The diagnostics
+are:
+  - standard and variance-stabilized (thinned) PP plots
+  - standard (thinned) QQ plots with pointwise confidence bounds
+  - smoothed data density vs. fitted density
+
+Thinning the PP and QQ plots uses fewer plot points than data points
+if the data set is large.  The program allows a maximum of 1000 plot
+points.  PP plots take a few seconds, QQ plots can take a while
+because of the way stable quantiles are computed (see 3. above).  Very
+large data sets will also take a while to compute smoothed data
+densities.
+
+8. Computing g(x) = -f'(x)/f(x).  This function is called "the
+nonlinear function" in signal processing.  It has an explicit form
+for the Gaussian case (g(x)=x), Cauchy case (g(x)=2x/(1+x^2)
+and in the Levy case (alpha=1/2,beta=1, g(x)= (1-3x)exp(-1/x)/(2x^5)),
+where the standardized densities are used (gamma=1,delta=0) and
+the S1 parameterization is used in the Levy case.  In all other
+cases, the function is computed numerically.
+
+The program will prompt you for a range for alpha, a range for beta,
+and then a grid of x-values.  It assumes scale gamma=1 and location delta=0,
+and uses the S0 parameterization.  It actually computes g
+numerically in all cases, so the three cases mentioned above give
+a check on the numerical accuracy of the calculations.
+
+
+STABLEC.EXE
+
+This is a console version of STABLE that has no graphics in it.  It also
+runs under Windows 95, 98, 2000.  It reads from stdin and writes
+prompts and input error messages to stdout, with normal program output
+going to the file stable.out.  The easiest way to run it is to put
+your commands/choices in an ascii file, say test.dat.  Then run
+STABLEC from a DOS prompt with input coming from that file:
+
+    stablec < test.dat
+
+Note that the program reads exactly as STABLE does.  In particular,
+if STABLE expects input on separate lines, then you must enter the
+values onto separate lines in your input file.  If you are confused,
+run STABLE once and record exactly what values go on what input lines.
+If you want to hide the prompts, redirect stdout also:
+
+   stablec < test.dat > test.junk
+
+Note that input error messages are written to stdout, so if you
+redirect it as above, you will have to look at the file test.junk
+to see error messages.
+
+
+
+
+
+BUGS AND LIMITATIONS:
+
+1. When 0 < |alpha-1| < 0.005, the program has numerical problems
+evaluating the pdf and cdf.  The current version of the program sets
+alpha=1 in these cases. This approximation is not bad in the S0
+parameterization.
+
+2. When alpha=1 and |beta| < 0.005, the program has numerical
+problems.  The current version sets beta=0.
+
+3. When alpha < 0.2, the program does not work well.  The
+densities and cdf vary very quickly in this case.  For example, when alpha=0.1
+and beta=1, the density is zero for x < tan(pi*0.1/2)=-0.15838; climbs
+abruptly to reach a maximum of approximately 1.0E6 at around
+x=-0.158285, and then drops very quickly to very small values.
+
+4. The current driver program allows 10001 x-values, and 20 values of
+alpha and beta.  If you need to, break your range into pieces, run
+the program on each subrange, write output to several files, and then
+concatenate your files.
+
+5. The user interface is simple and little error checking is
+done.  Typing errors may lead to the program exiting.  Misspecified
+ranges may lead to infinite loops.
+
+6. Problems near boundaries of the parameter space.  While alpha
+can be any positive number, small values of alpha specify distributions
+that are very unusual.  For alpha < 0.4, you may have to tinker with
+some of the internal tolerances to get reliable results.  For alpha < .1,
+you cannot get reliable results from the current code.  Also, when
+beta is near 1 or -1, there are some problems.  The approximation
+to the density is inaccurate for |beta| > 0.99.  The current version of
+the program interpolates for 0.99 < |beta| <= 1.  A side effect of this
+is that the maximum likelihood fitting routines will always yield a
+value of alpha and beta at a grid point.  Specifically,
+alpha will be in the set {0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,
+1.5,1.6,1.7,1.8,1.9,1.95,2} and beta will be in {0.99,1} (or {-1,-0.99}).
+
+If you run into this problem, you should rerun your search with the
+(much slower) method using PDF, not the approximation QKSPDF.
+
+7. On the tails, there are sometimes problems.  For example, when
+alpha=.9, beta=1, gamma=1, delta=0, x=2, the pdf calculations fail
+to give accurate results.  While positive, the value of the density
+at that point is less than 1.0e-14, which is around machine precision
+for double precision.  Both the pdf and cdf calculations can be
+unreliable in these cases. To the best of my knowledge, this only
+happens when the result is less than 1.0e-14.
+
+8. The program works on standardized z=(x-delta)/gamma in the S0
+parameterization.  When |z-beta*tan(pi*alpha/2)| is small, the
+computations of the density and cumulative have numerical problems.
+(See the formulas for computations in the paper referenced above
+for details.)  The program works around this by setting
+z = beta*tan(pi*alpha/2) when
+|z-beta*tan(pi*alpha/2)| < tol(5)*alpha**(1/alpha).  (The bound
+on the right is ad hoc, to get reasonable behavior when alpha
+is small).  You can set tol(5) to any number by changing tolerances
+as described above, though you may get unreliable results or
+program errors.
+
+
+                           ................
+
+Please report problems and bugs to me at the address given at the
+top of this document.

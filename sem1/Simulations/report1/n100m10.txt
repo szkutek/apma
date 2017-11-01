@@ -1,0 +1,18 @@
+alpha    beta      gamma          delta
+         S0 parameters  0.5588  0.1334   0.935257      -0.455907E-02
+
+alpha    beta      gamma          delta
+         S0 parameters  0.4166  0.9900    2.81429        2.40858 
+
+alpha    beta      gamma          delta
+         S0 parameters  0.5038 -0.0851    2.09395      -0.228830 
+
+
+alpha    beta      gamma          delta
+         S0 parameters  1.3465  0.5409   0.996354      -0.851943E-01
+
+alpha    beta      gamma          delta
+         S0 parameters  1.1000  1.0000   0.920898       -1.97566
+
+alpha    beta      gamma          delta
+         S0 parameters  1.2506  0.0663    1.67297       0.254469

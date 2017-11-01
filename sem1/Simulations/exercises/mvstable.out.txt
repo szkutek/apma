@@ -1,0 +1,111 @@
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/05/2017        06:52:29.77                                   
+
+
+ Bivariate stable pdf using mvpdf1
+  Spectral measure read from file: 
+ sample.txt                                                      
+
+      alpha=  1.20
+
+      Isotropic/radially symmetric gamma(t) =      1.0000    
+
+      shift vector=      1.0000         0.0000    
+      x grid     0.0000     to      3.0000     step      1.0000    
+      y grid     0.0000     to      0.0000     step      0.0000    
+      symtrc=       T
+
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          0.61469897E-01
+       1.0000000           0.0000000          0.11973031    
+       2.0000000           0.0000000          0.61469897E-01
+       3.0000000           0.0000000          0.17389149E-01
+   4/05/2017        06:55:19.42   
+
+
+ Bivariate stable pdf using mvpdf1
+  Spectral measure read from file: 
+ sample.txt                                                      
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          -19.035054    
+       1.0000000           0.0000000          0.89012838    
+       2.0000000           0.0000000          -19.035054    
+       3.0000000           0.0000000          -9.5032366    
+   4/05/2017        06:57:17.68   
+
+
+ Bivariate stable pdf using mvpdf1
+  Spectral measure read from file: 
+ 1.2                                                             
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          -19.035054    
+       1.0000000           0.0000000          0.89012838    
+       2.0000000           0.0000000          -19.035054    
+       3.0000000           0.0000000          -9.5032366    
+   4/05/2017        06:57:44.10   
+
+
+ Bivariate stable pdf using mvpdf1
+  Spectral measure read from file: 
+ 1.2                                                             
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          -19.035054    
+       1.0000000           0.0000000          0.89012838    
+       2.0000000           0.0000000          -19.035054    
+       3.0000000           0.0000000          -9.5032366    
+   4/05/2017        06:58:16.61   
+
+
+ Bivariate stable pdf using mvpdf1
+  Spectral measure read from file: 
+ sample.txt                                                      
+
+      alpha=  1.20
+
+      Isotropic/radially symmetric gamma(t) =      1.0000    
+
+      shift vector=      1.0000         0.0000    
+      x grid     0.0000     to      3.0000     step      1.0000    
+      y grid     0.0000     to      0.0000     step      0.0000    
+      symtrc=       T
+
+
+               x                   y              p(x,y)
+       0.0000000           0.0000000          0.61469897E-01
+       1.0000000           0.0000000          0.11973031    
+       2.0000000           0.0000000          0.61469897E-01
+       3.0000000           0.0000000          0.17389149E-01
+   4/05/2017        06:58:30.29   
+
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/12/2017        08:04:52.56                                   
+        1000 data vectors read from input file mvs.txt                         
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/12/2017        08:05:46.73                                   
+           2 data vectors read from input file mvs.txt                         
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/12/2017        08:06:05.96                                   
+           2 data vectors read from input file mvs.txt                         
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/12/2017        08:07:13.39                                   
+        1000 data vectors read from input file mvs.txt                         
+
+
+ MVSTABLE 2.0 (15 March 2000)     Copyright John P. Nolan (jpnolan@american.edu)
+       Run time:  4/12/2017        08:11:14.98                                   
+        1000 data vectors read from input file mvs.txt                         
+

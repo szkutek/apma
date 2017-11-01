@@ -1,0 +1,53 @@
+>> r2_speed
+
+M = 1, H = 0.8 OK
+Elapsed time is 0.00155687 seconds.
+Elapsed time is 13.9883 seconds.
+>> r2_speed
+
+M = 1, H = 0.8
+Elapsed time is 0.00370502 seconds.
+Elapsed time is 13.8521 seconds.
+>> r2_speed
+
+M = 1, H = 0.3 OK
+Elapsed time is 0.00109601 seconds.
+Elapsed time is 13.8556 seconds.
+>> r2_speed
+
+M = 1, H = 0.3
+Elapsed time is 0.00161982 seconds.
+Elapsed time is 13.8988 seconds.
+>> r2_speed
+
+M = 100, H = 0.3 OK
+Elapsed time is 0.082078 seconds.
+Elapsed time is 13.9526 seconds.
+M = 100, H = 0.8 OK
+Elapsed time is 0.0975978 seconds.
+Elapsed time is 13.9317 seconds.
+>> r2_speed
+
+M = 1000, H = 0.3
+Elapsed time is 0.820176 seconds.
+Elapsed time is 14.0207 seconds.
+M = 1000, H = 0.8
+Elapsed time is 0.80119 seconds.
+Elapsed time is 14.0216 seconds.
+
+M = 10000, H = 0.3
+Elapsed time is 8.13376 seconds.
+Elapsed time is 15.2414 seconds.
+M = 10000, H = 0.8
+Elapsed time is 7.99506 seconds.
+Elapsed time is 15.238 seconds.
+
+
+>> r2_speed
+
+M = 1e+06, H = 0.3
+Elapsed time is 803.312 seconds.
+error: out of memory or dimension too large for Octave's index type
+error: called from
+    choleskyFBM at line 13 column 3
+    r2_speed at line 22 column 3
