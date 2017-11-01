@@ -1,34 +1,44 @@
+;; Agnieszka Szkutek, 208619
+
 to setup
   clear-all
   reset-ticks
 
-  resize-world 0 grid-size 0 grid-size
+  ;; set grid size
+  resize-world 0 (grid-size - 1) 0 (grid-size - 1)
 
   ask patches [
+    ;; distribute trees randomly with given probability
     ifelse (random 100) < density
     [ set pcolor green ]
     [ set pcolor black ]
 
+   ;; set on fire first row of trees
    if pycor = max-pycor and pcolor = green [ set pcolor red ]
-;  if pycor = 10 and pxcor = 10 [ set pcolor red ]
   ]
 
 end
 
 to go
+  ;; stop if there are no more red trees (red patches)
   if all? patches [ pcolor != red ] [ stop ]
 
+  ;; for all burning trees (red patches)
   ask patches with [ pcolor = red ] [
-
     let wind wind-direction
-    ask neighbors with [ pcolor = green ] [
-      let direction towards myself ; direction from the green patch to the burning tree
 
+    ;; for all green neighbours of the red patch
+    ask neighbors with [ pcolor = green ] [
+
+      ;; direction from the green patch to the red patch
+      let direction towards myself
+
+      ;; if there is no wind
       if wind = "none" [ set pcolor red ]
 
       ;; simple wind model with 4 directions
       ;; if the fire starts from the top edge
-      ;; then only the Northen wind will spread the fire
+      ;; then only the northern wind will spread the fire
       if direction = 0 and wind = "N" [ set pcolor red ]
       if direction = 90 and wind = "E" [ set pcolor red ]
       if direction = 180 and wind = "S" [ set pcolor red ]
@@ -42,8 +52,8 @@ end
 GRAPHICS-WINDOW
 210
 10
-739
-540
+716
+517
 -1
 -1
 10.0
@@ -57,9 +67,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-50
+49
 0
-50
+49
 1
 1
 1
@@ -75,16 +85,16 @@ density
 density
 0
 100
-50.0
+40.0
 10
 1
 %
 HORIZONTAL
 
 BUTTON
-31
+30
 82
-104
+103
 115
 setup
 setup
@@ -100,9 +110,9 @@ NIL
 
 BUTTON
 113
-81
+82
 176
-114
+115
 go
 go
 T
