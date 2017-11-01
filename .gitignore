@@ -1,3 +1,15 @@
+# rosyjski i python od Katarzyny
+rosyjski/
+kaska.py
+
+# R & knitr
+*.toc
+*.sty
+.Rhistory
+.RData
+figure/
+*.synctex.gz
+
 # LaTeX
 *.aux
 *.log
