@@ -1,18 +1,17 @@
-from random import random
-
 import numpy as np
 import matplotlib.pyplot as plt
-import imageio
+import matplotlib.animation as animation
 
 
-# TODO change implementation?, change animation (don't save, the process could be infinite),
-# TODO maybe use matshow http://electronut.in/a-simple-python-matplotlib-implementation-of-conways-game-of-life/
+# TODO read input from text file
+
 
 def create_random_grid(N, M, p):
-    return np.array([[1 if random() < p else 0 for _ in range(M)] for _ in range(N)])
+    # return np.array([[1 if random() < p else 0 for _ in range(M)] for _ in range(N)])
+    return np.array([1 if np.random.random() < p else 0 for _ in range(M * N)]).reshape(N, M)
 
 
-def neighbours(state, x, y):
+def count_neighbours(state, x, y):
     N, M = state.shape
     nbrs = [(i, j)
             for i in [x - 1, x, x + 1]
@@ -24,71 +23,51 @@ def neighbours(state, x, y):
     return alive
 
 
-def game_of_life(initial_state, filename):
-    next_state = initial_state.copy()
-    N, M = initial_state.shape
-    state_change = True
-    plot_i = 0
-    while state_change:
-        state_change = False
-        for x, y in np.ndindex(initial_state.shape):
-            live_neighbours = neighbours(initial_state, x, y)
+def next_generation(frame):
+    global init_state
+    next_state = init_state.copy()
+    for x, y in np.ndindex(init_state.shape):
+        live_neighbours = count_neighbours(init_state, x, y)
 
-            if initial_state[x][y] == 1:
-                if live_neighbours < 2 or live_neighbours > 3:
-                    next_state[x, y] = 0  # underpopulation or overpopulation
-                    state_change = True
-            else:
-                if live_neighbours == 3:
-                    next_state[x][y] = 1
-                    state_change = True
+        if init_state[x][y] == 1:
+            if live_neighbours < 2 or live_neighbours > 3:
+                next_state[x, y] = 0  # underpopulation or overpopulation
+        else:
+            if live_neighbours == 3:
+                next_state[x][y] = 1
 
-        success = save_plot(plot_i, initial_state, filename)
-        if success:
-            plot_i += 1
-
-        initial_state = next_state.copy()
-    return plot_i
+    mat.set_data(next_state)
+    init_state = next_state
+    return mat, next_state
 
 
-def save_plot(i, game_state, pathname):
-    N, M = game_state.shape
-    points = [(i, j) for i, j in np.ndindex(game_state.shape) if game_state[i][j]]
-    if len(points):
-        x, y = zip(*points)
-    else:
-        return 1
-    xmin, xmax, ymin, ymax = 0, M, 0, N
-
-    fig_size = 10
-    fig = plt.figure(figsize=(fig_size, fig_size))
-    p = fig.add_subplot(111)
-
-    margin = 0
-    p.plot(x, y, linestyle='None', marker='o', color='k')
-    p.grid(True)
-    p.set_xlim([xmin - margin, xmax + margin])
-    p.set_ylim([ymin - margin, ymax + margin])
-
-    s = pathname + "_" + str(i) + '.png'
-    plt.savefig(s)
-    # plt.clf()
-    plt.close(fig)
-    return 0
+def init_from_file(filename):
+    file = open(filename, 'r')
+    res = [[int(char) for char in line if char == '1' or char == '0'] for line in file.readlines()]
+    file.close()
+    return np.array(res)
 
 
-def movie(n, filename, moviename, duration=0.2):
-    frames = []
-    for i in range(n):
-        path = filename + "_" + str(i) + '.png'
-        frames.append(imageio.imread(path))
+def examples():
+    # init_state = init_from_file('glider.txt')
+    # init_state = init_from_file('small_exploder.txt')
+    # init_state = init_from_file('exploder.txt')
+    # init_state = init_from_file('10_cell_row.txt')
+    # init_state = init_from_file('small_spaceship.txt')
+    init_state = init_from_file('tumbler.txt')
 
-    kargs = {'duration': duration}
-    imageio.mimwrite(moviename + '.gif', frames, 'gif', **kargs)
+    fig, ax = plt.subplots()
+    ax.matshow(init_state)
+    plt.title('initial state')
+    return init_state
 
 
 if __name__ == '__main__':
-    grid = create_random_grid(5, 5, 0.5)
+    # init_state = create_random_grid(100, 100, 0.1)
+    init_state = examples()
 
-    n = game_of_life(grid, 'test')
-    movie(n, 'test', 'test_movie', 0.5)
+    fig, ax = plt.subplots()
+    plt.title('the animation')
+    mat = ax.matshow(init_state)
+    ani = animation.FuncAnimation(fig, next_generation, interval=200)
+    plt.show()
