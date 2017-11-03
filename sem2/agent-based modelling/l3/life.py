@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-# TODO read input from text file
-
-
 def create_random_grid(N, M, p):
     # return np.array([[1 if random() < p else 0 for _ in range(M)] for _ in range(N)])
     return np.array([1 if np.random.random() < p else 0 for _ in range(M * N)]).reshape(N, M)
@@ -48,13 +45,9 @@ def init_from_file(filename):
     return np.array(res)
 
 
-def examples():
-    # init_state = init_from_file('glider.txt')
-    # init_state = init_from_file('small_exploder.txt')
-    # init_state = init_from_file('exploder.txt')
-    # init_state = init_from_file('10_cell_row.txt')
-    # init_state = init_from_file('small_spaceship.txt')
-    init_state = init_from_file('tumbler.txt')
+def examples(i):
+    filenames = {1: 'glider', 2: 'small_exploder', 3: 'exploder', 4: '10_cell_row', 5: 'small_spaceship', 6: 'tumbler'}
+    init_state = init_from_file(filenames[i] + '.txt')
 
     fig, ax = plt.subplots()
     ax.matshow(init_state)
@@ -64,7 +57,7 @@ def examples():
 
 if __name__ == '__main__':
     # init_state = create_random_grid(100, 100, 0.1)
-    init_state = examples()
+    init_state = examples(6)
 
     fig, ax = plt.subplots()
     plt.title('the animation')
