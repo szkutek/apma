@@ -1,13 +1,8 @@
-import urllib.request
-from bs4 import BeautifulSoup
+import gmplot
+import numpy as np
 import pandas as pd
-
-from typing import List
 import requests
 from geotext import GeoText
-import matplotlib.pyplot as plt
-import numpy as np
-import gmplot
 
 
 def list_of_visited_cities():
@@ -69,8 +64,6 @@ def correct_path(path):
         lat1, lng1 = path[i]
         lat2, lng2 = path[i + 1]
         lat3, lng3 = path[i + 2]
-        # if distance(lng1, lng2) < 50 and distance(lat1, lat2) > 20:
-        #     indices_to_remove.append(i + 1)
         if distance(lat1, lat3) < 30 and (distance(lat1, lat2) > 30 or distance(lat2, lat3) > 30):
             indices_to_remove.append(i + 1)
     print(len(indices_to_remove))
@@ -98,8 +91,8 @@ if __name__ == '__main__':
     path = path_with_cities_from_csv(cities)
     draw_map(path, 'around_the_world_csv')
     draw_map(correct_path(path), 'around_the_world_csv_corrected')
-
-    # CITIES FROM GOOGLEAPI
-    path = path_with_cities_from_googleapi(cities)
-    draw_map(path, 'around_the_world_google')
-    draw_map(correct_path(path), 'around_the_world_google_corrected')
+    #
+    # # CITIES FROM GOOGLEAPI
+    # path = path_with_cities_from_googleapi(cities)
+    # draw_map(path, 'around_the_world_google')
+    # draw_map(correct_path(path), 'around_the_world_google_corrected')
