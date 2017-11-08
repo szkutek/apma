@@ -4,7 +4,6 @@ import matplotlib.animation as animation
 
 
 def create_random_grid(N, M, p):
-    # return np.array([[1 if random() < p else 0 for _ in range(M)] for _ in range(N)])
     return np.array([1 if np.random.random() < p else 0 for _ in range(M * N)]).reshape(N, M)
 
 
@@ -57,7 +56,7 @@ def examples(i):
 
 if __name__ == '__main__':
     # init_state = create_random_grid(100, 100, 0.1)
-    init_state = examples(6)
+    init_state = examples(5)
 
     fig, ax = plt.subplots()
     plt.title('the animation')
