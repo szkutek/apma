@@ -1,0 +1,61 @@
+%-- 2017-03-01 07:39 --%
+lam=1; al=3;
+help unifrnd
+u=unifrnd(0,1,1,1000);
+x=al
+x=al*(u^(-1/al - 1);
+x=al*(u^(-1/al - 1));
+x=al*(u^(-1/al) - 1);
+x=al*(u.^(-1/al) - 1);
+plot(x);
+plot(1:1000,x);
+ksdensity(x)
+plot(x,'*');
+u=unifrnd(0,1,1,1000);
+x=al*(u.^(-1/al) - 1);
+plot(x,'*');
+x=lam*(u.^(-1/al) - 1);
+plot(x,'*');
+mean(x)
+ex=lam/(al-1)
+xs = sort(x);
+nlen=1000;
+n=length(x);
+y=(1:n)/n;
+plot(xs,y);
+F=1-(lam/(lam+1:1000)).^(al);
+F=1-(lam./(lam+1:1000)).^(al);
+plot(F,1:1000);
+F=1-(lam./(lam+0:1000)).^(al);
+plot(F,0:999)
+t=linspace(min(x),max(x),n);
+F=1-(lam./(lam+t)).^(al);
+plot(t,F);
+plot(t,F); hold on; plot(xs,y);
+plot(log(xs),log(1-y));
+plot(log(xs),log((n:-1:1)/n));
+plot(log(xs),log(1-(1:n)/n));
+plot(log(xs),log(1-y));
+plot(xs,y);
+loglog(xs,y);
+plot(log(xs),log(1-y));
+plot(log(xs),log(1-y),'*');
+help polyfit
+plot(log(xs(900:1000)),log(1-y(900:1000)),'*');
+plot(log(xs(900:997)),log(1-y(900:997)),'*');
+plot(log(xs(900:996)),log(1-y(900:996)),'*');
+polyfit(log(xs(900:996)),log(1-y(900:996)),1);
+[a,b]=polyfit(log(xs(900:996)),log(1-y(900:996)),1);
+plot(a*t+b);
+plot(a(1)*t+a(2));
+plot(a(1)*xs(900:996)+a(2));
+plot(a(1)*linspace(min(xs(900:996)),max(xs(900:996)),length(xs(900:996)))+a(2));
+polyfit(log(xs(900:996)),log(1-y(900:996)),1);
+plot(log(xs(900:996)),log(1-y(900:996)),'*');
+hold on; plot(a(1)*linspace(min(xs(900:996)),max(xs(900:996)),length(xs(900:996)))+a(2));
+hold on; plot(a(2)*linspace(min(xs(900:996)),max(xs(900:996)),length(xs(900:996)))+a(1));
+plot(a(2)*linspace(min(xs(900:996)),max(xs(900:996)),length(xs(900:996)))+a(1));
+[a,b]=polyfit(log(xs(900:999)),log(1-y(900:999)),1);
+[a,b]=polyfit(log(xs(800:999)),log(1-y(800:999)),1);
+[a,b]=polyfit(log(xs(900:999)),log(1-y(900:999)),1);
+[a,b]=polyfit(log(xs(950:995)),log(1-y(950:995)),1);

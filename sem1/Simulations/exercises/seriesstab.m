@@ -1,4 +1,4 @@
-function y = seriesstab(alpha,M,N)
+function y = seriesstab(alpha,mu,M,N)
 
 y=zeros(1,N);
 for i=1:N
@@ -8,3 +8,4 @@ for i=1:N
     G=-cumsum(log(rand(1,M)));
     y(i)=sum(E .* G.^(-1/alpha));
 end
+y = y + mu;

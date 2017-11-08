@@ -14,7 +14,7 @@ X = stabrnd(a,b,s,m,N);
 % X = stabrnd(1.5,-1,1,-2,10000);
 
 %%
-
+%%%% Hill estimator?
 % sX=sort(X(X>0),'descend');
 % n = length(sX);
 % gam=1/a;

@@ -1,0 +1,5 @@
+
+
+t=linspace(min(X),max(X),length(X));
+dens = kernel_density(t',X',10);
+plot(t,dens);

@@ -24,8 +24,11 @@ X=unifrnd(0,1,N,n);
 m=1/2; s=1/12;
 
 Y=(sum(X,2)-n*m) / (sqrt(n)*sqrt(s));
-% plot(Y)
-% ksdensity(Y)
+%plot(Y);
+%ksdensity(Y)
+t=linspace(min(Y),max(Y),1000);
+ksden = kernel_density(t',Y);
+plot(t,ksden)
 
 
-[H,p]=jbtest(Y) % p < 0.05 -> Y not Gaussian
+%[H,p]=jbtest(Y) % p < 0.05 -> Y not Gaussian

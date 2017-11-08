@@ -8,6 +8,7 @@ X = stabrnd(a,b,s,0,N);
 X=X';
 Y = stabrnd(a,b,s,2,N);
 Y=Y';
+% multivariate alpha-stable r.v.
 Z=[X,Y];
 save('mvs.txt','Z','-ascii');
 
