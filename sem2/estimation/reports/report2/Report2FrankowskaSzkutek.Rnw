@@ -78,7 +78,7 @@ to calculate the first derivative of $L$ with respect to $\alpha$.
 \[ \frac{\partial L(\alpha)}{\partial \alpha'} = 0 - 2y'X + \alpha'(X'X + X'X) = - 2y'X +2 \alpha'X'X. \]
 
 
-\subsection{Part 3}
+\subsection{Part 3} \label{referencja}
 Now, to minimize the $L$ function, we will solve the first order condition equation $\frac{\partial L(\alpha)}{\partial \alpha'} = 0 $.
 
 \begin{align*}
@@ -262,15 +262,75 @@ We know that the restriction matrix $R$ satisfies equation $R \alpha = r$. In th
     0 & 1 & -1
   \end{bmatrix}
 \]
+Rank of the restriction matrix is $rank(R) = 2$, because there are two linearly independent vectors in matrix $R$, $[1,1,1]$ and $[0,1,-1]$.
+
+
+\subsection{Part 2}
+To express vector $\alpha$ and the loss function $L$ as functions of $\alpha_3$, we will first express $\alpha_1$ and $\alpha_2$ as functions of $\alpha_3$.
+
+\[ 
+\begin{cases}
+  \alpha_1 + \alpha_2 + \alpha_3 = 0 \\
+  \alpha_2 - \alpha_3 = 0
+\end{cases}
+\quad \Leftrightarrow \quad
+\begin{cases}
+  \alpha_1 = - \alpha_2 - \alpha_3 \\
+  \alpha_2 = \alpha_3
+\end{cases}
+\quad \Leftrightarrow \quad
+\begin{cases}
+  \alpha_1 = - 2 \alpha_3 \\
+  \alpha_2 = \alpha_3
+\end{cases}
+\]
+
+So 
+\[
+  \alpha = 
+  \begin{bmatrix}  
+      \alpha_1 \\ \alpha_2 \\ \alpha_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \alpha_3 \\ \alpha_3 \\ \alpha_3
+  \end{bmatrix} 
+  =
+  \alpha_3
+  \begin{bmatrix}  
+      -2 \\ 1 \\ 1
+  \end{bmatrix} 
+\]
+
+and
+
+\begin{gather*}
+L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha = 
+  y'y - 2y'X\alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  = \\
+  y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + \alpha_3^2 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
+\end{gather*}
 
 
 
+\subsection{Part 3}
+Estimator of $\alpha_3$ is equal to 
+\[ \hat{\alpha}_3 = \text{arg}\min_{\alpha_3\ \ } L(\alpha_3) \]
 
-
-
-
-
-
+Again, we will use the formula $\frac{\partial A\beta}{\partial \beta'} = A$ to calculate 
+\[ \frac{\partial L(\alpha_3)}{\partial \alpha_3} = 
+  0 - 2 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + 2 \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+\]
+From F.O.C and the above formula we obtain 
+\begin{align*}
+  \hat{\alpha}_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  & = y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \\
+  \hat{\alpha}_3 & =
+    y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \left(\begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \right)^{-1}\\
+\end{align*}
 
 
 
@@ -281,6 +341,100 @@ We know that the restriction matrix $R$ satisfies equation $R \alpha = r$. In th
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Exercise 3}
+
+
+
+Next, we consider the following model
+\[y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n}\]
+with $\alpha_{1} = \alpha_{2} = 1$ and $\varepsilon_{n}\sim N(0,1)$.
+
+
+
+\subsection{Part 1}
+We will generate samples from above model in two cases:
+\begin{enumerate}
+\item[a)] $X_{1}$ and $X_{2}$ are independent and $X \sim N(0,I_{2})$,
+\item[b)] $X_{1}$ and $X_{2}$ are dependent and $X \sim N(0,\Sigma)$.
+\end{enumerate}
+<<ex3.1, echo=FALSE, eval=TRUE, results='asis'>>=
+#task 3
+#dot 1, generating model a and b
+library(mvtnorm)
+n <- 100
+#model a
+epsilon_a <- rnorm(n, mean = 0, sd = 1)
+sigma <- diag(2) 
+mean <- c(0,0)
+X_a <- rmvnorm(n, mean , sigma)
+Y_a <- X_a[,1] + X_a[,2] + epsilon_a
+par(mfrow=c(2,1),mar=c(3, 4, 3, 3))
+plot(Y_a, main = 'Model a')
+#model b
+epsilon_b <- rnorm(n, mean = 0, sd = 1)
+sigma <- matrix(c(2,0.5,0.5,2),2,2)
+X_b <- rmvnorm(n, mean , sigma)
+Y_b <- X_b[,1] + X_b[,2] + epsilon_b
+plot(Y_b, main = 'Model b')
+@
+
+
+
+\subsection{Part 2 and 3}
+We have the following models: 
+\[ y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n} \]
+\[ y_{n} = \beta X_{1n}+u_{n} \]
+We will use the formula from subsection \ref{referencja} to obtain $\alpha_{1}$ and $\beta$ in those models. 
+Below we compare the results for different sample sizes.
+<<ex3.2, echo=FALSE, eval=TRUE, results='asis'>>=
+#dot 2 and 3
+# computing alpha1 and beta estimators for model a and b
+mean_a <- c(0,0)
+sigma_a <- diag(2) 
+mean_b <- c(0,0)
+sigma_b <- matrix(c(2,0.5,0.5,2),2,2)
+n <- c(10,100,1000)
+resalts <- matrix(c(2,0.5,0.5,2),2,2)
+alpha_est_a_1 <- integer(3)
+beta_est_a <- integer(3)
+alpha_est_b_1 <- integer(3)
+beta_est_b <- integer(3)
+j <- 1
+# one loop runs for n = (10,100,1000), second loop is the Monte Carlo loop (1000)
+for (i in n){
+  alpha_est_a_1_mc <- integer(1000)
+  beta_est_a_mc <- integer(1000)
+  alpha_est_b_1_mc <- integer(1000)
+  beta_est_b_mc <- integer(1000)
+  for (k in 1:1000){
+  epsilon_a <- rnorm(i, mean = 0, sd = 1)
+  X_a <- rmvnorm(i, mean_a , sigma_a)
+  Y_a <- X_a[,1] + X_a[,2] + epsilon_a
+  alpha_est_a <- solve(t(X_a)%*%X_a)%*%t(X_a)%*%as.numeric(Y_a) 
+  alpha_est_a_1_mc[k] <- alpha_est_a[1]
+  beta_est_a_mc[k] <- solve(t(X_a[,1])%*%X_a[,1])%*%t(X_a[,1])%*%as.numeric(Y_a)
+  epsilon_b <- rnorm(i, mean = 0, sd = 1)
+  X_b <- rmvnorm(i, mean_b , sigma_b)
+  Y_b <- X_b[,1] + X_b[,2] + epsilon_b
+  alpha_est_b <- solve(t(X_b)%*%X_b)%*%t(X_b)%*%as.numeric(Y_b)
+  alpha_est_b_1_mc[k] <- alpha_est_b[1]
+  beta_est_b_mc[k] <- solve(t(X_b[,1])%*%X_b[,1])%*%t(X_b[,1])%*%as.numeric(Y_b)
+  }
+  alpha_est_a_1[j] <- mean(alpha_est_a_1_mc) 
+  beta_est_a[j] <- mean(beta_est_a_mc)
+  alpha_est_b_1[j] <- mean(alpha_est_b_1_mc)
+  beta_est_b[j] <- mean(beta_est_b_mc)
+  j <- j+1
+}
+
+# create results as table
+a <- data.frame(N = c(10,100,1000), theoretical_alpha_1 = c(1,1,1), alpha_1_est = alpha_est_a_1, beta_est = beta_est_a)
+b <- data.frame(N = c(10,100,1000), theoretical_alpha_1 = c(1,1,1), alpha_1_est = alpha_est_b_1, beta_est = beta_est_b)
+table_a <- xtable(a, digits = 5, caption = 'Estimator of alpha1 and beta for model a')
+table_b <- xtable(b, digits = 5, caption = 'Estimator of alpha1 and beta for model a')
+print(table_a)
+print(table_b)
+@
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -146,7 +146,7 @@ to calculate the first derivative of $L$ with respect to $\alpha$.
 \[ \frac{\partial L(\alpha)}{\partial \alpha'} = 0 - 2y'X + \alpha'(X'X + X'X) = - 2y'X +2 \alpha'X'X. \]
 
 
-\subsection{Part 3}
+\subsection{Part 3} \label{referencja}
 Now, to minimize the $L$ function, we will solve the first order condition equation $\frac{\partial L(\alpha)}{\partial \alpha'} = 0 $.
 
 \begin{align*}
@@ -160,7 +160,7 @@ So $\hat{\alpha}  = (X'X)^{-1} X'y$ is the LS estimator of the model parameter.
 
 The first vector is the theoretical estimator of $\alpha$ and the second is the estimator obtained with R's linear regression model:
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 16:16:28 2017
+% Sun Nov 12 17:51:33 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rlll}
@@ -184,7 +184,7 @@ We are using unbiased estimator for the variance of residuals
 \[ \hat{\sigma}^2 = \frac{u'u}{N-K},\]
 where in our case $N=100$ and $K=3$. 
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 16:16:28 2017
+% Sun Nov 12 17:51:33 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rrr}
@@ -257,7 +257,7 @@ The $t$-statistic tests the hypothesis $H_0:\ \alpha_i = 0$, $H_1:\ \alpha_i \ne
 where $t_{\hat{\alpha_i}} \sim t(N-K) = t(100-3) = t(97)$.
 
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 16:16:29 2017
+% Sun Nov 12 17:51:34 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rlll}
@@ -296,22 +296,82 @@ We know that the restriction matrix $R$ satisfies equation $R \alpha = r$. In th
   \begin{bmatrix}  
     0 \\ 0
   \end{bmatrix} 
-  \Rightarrow
+  \quad \Rightarrow \quad
   R = 
   \begin{bmatrix}  
     1 & 1 & 1 \\
     0 & 1 & -1
   \end{bmatrix}
 \]
+Rank of the restriction matrix is $rank(R) = 2$, because there are two linearly independent vectors in matrix $R$, $[1,1,1]$ and $[0,1,-1]$.
+
+
+\subsection{Part 2}
+To express vector $\alpha$ and the loss function $L$ as functions of $\alpha_3$, we will first express $\alpha_1$ and $\alpha_2$ as functions of $\alpha_3$.
+
+\[ 
+\begin{cases}
+  \alpha_1 + \alpha_2 + \alpha_3 = 0 \\
+  \alpha_2 - \alpha_3 = 0
+\end{cases}
+\quad \Leftrightarrow \quad
+\begin{cases}
+  \alpha_1 = - \alpha_2 - \alpha_3 \\
+  \alpha_2 = \alpha_3
+\end{cases}
+\quad \Leftrightarrow \quad
+\begin{cases}
+  \alpha_1 = - 2 \alpha_3 \\
+  \alpha_2 = \alpha_3
+\end{cases}
+\]
+
+So 
+\[
+  \alpha = 
+  \begin{bmatrix}  
+      \alpha_1 \\ \alpha_2 \\ \alpha_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \alpha_3 \\ \alpha_3 \\ \alpha_3
+  \end{bmatrix} 
+  =
+  \alpha_3
+  \begin{bmatrix}  
+      -2 \\ 1 \\ 1
+  \end{bmatrix} 
+\]
+
+and
+
+\begin{gather*}
+L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha = 
+  y'y - 2y'X\alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  = \\
+  y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + \alpha_3^2 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
+\end{gather*}
 
 
 
+\subsection{Part 3}
+Estimator of $\alpha_3$ is equal to 
+\[ \hat{\alpha}_3 = \text{arg}\min_{\alpha_3\ \ } L(\alpha_3) \]
 
-
-
-
-
-
+Again, we will use the formula $\frac{\partial A\beta}{\partial \beta'} = A$ to calculate 
+\[ \frac{\partial L(\alpha_3)}{\partial \alpha_3} = 
+  0 - 2 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  + 2 \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+\]
+From F.O.C and the above formula we obtain 
+\begin{align*}
+  \hat{\alpha}_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  & = y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \\
+  \hat{\alpha}_3 & =
+    y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \left(\begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \right)^{-1}\\
+\end{align*}
 
 
 
@@ -322,6 +382,70 @@ We know that the restriction matrix $R$ satisfies equation $R \alpha = r$. In th
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Exercise 3}
+
+
+
+Next, we consider the following model
+\[y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n}\]
+with $\alpha_{1} = \alpha_{2} = 1$ and $\varepsilon_{n}\sim N(0,1)$.
+
+
+
+\subsection{Part 1}
+We will generate samples from above model in two cases:
+\begin{enumerate}
+\item[a)] $X_{1}$ and $X_{2}$ are independent and $X \sim N(0,I_{2})$,
+\item[b)] $X_{1}$ and $X_{2}$ are dependent and $X \sim N(0,\Sigma)$.
+\end{enumerate}
+
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex3_1-1} 
+
+}
+
+
+
+
+
+
+\subsection{Part 2 and 3}
+We have the following models: 
+\[ y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n} \]
+\[ y_{n} = \beta X_{1n}+u_{n} \]
+We will use the formula from subsection \ref{referencja} to obtain $\alpha_{1}$ and $\beta$ in those models. 
+Below we compare the results for different sample sizes.
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Sun Nov 12 17:51:36 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
+  \hline
+1 & 10.00000 & 1.00000 & 1.01685 & 1.00558 \\ 
+  2 & 100.00000 & 1.00000 & 0.99905 & 1.00060 \\ 
+  3 & 1000.00000 & 1.00000 & 1.00147 & 1.00059 \\ 
+   \hline
+\end{tabular}
+\caption{Estimator of alpha1 and beta for model a} 
+\end{table}
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Sun Nov 12 17:51:36 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
+  \hline
+1 & 10.00000 & 1.00000 & 1.00154 & 1.25233 \\ 
+  2 & 100.00000 & 1.00000 & 0.99924 & 1.25446 \\ 
+  3 & 1000.00000 & 1.00000 & 1.00023 & 1.25047 \\ 
+   \hline
+\end{tabular}
+\caption{Estimator of alpha1 and beta for model a} 
+\end{table}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
