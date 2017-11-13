@@ -5,7 +5,7 @@ from matplotlib import animation
 
 
 def distribute_agents(N, Nb) -> (np.array, np.array, np.array):
-    M = 3
+    M = 4
     Nr = N - Nb
 
     arr = np.zeros([M, M], int)
@@ -29,10 +29,10 @@ def distribute_agents(N, Nb) -> (np.array, np.array, np.array):
 
 def count_neighbours(state, x, y, m):
     N, M = state.shape
-    nbrs = [(i, j)
+    nbrs = [(i % N, j % M)
             for i in range(x - m, x + m + 1)
             for j in range(y - m, y + m + 1)
-            if not (i == x and j == y) and 0 <= i < N and 0 <= j < M]
+            if not (i == x and j == y)]
     blue = 0
     red = 0
     empty = 0
@@ -43,31 +43,47 @@ def count_neighbours(state, x, y, m):
             red += 1
         else:
             empty += 1
-
     return blue, red, empty
 
 
-# def schelling(lattice, blue_coord, red_coord, jt, mt=1):
+# def schelling(lattice, blue_coord, red_coord, jb, mb=1):
 def schelling(frame):
-    agents_coord = blue_coord + red_coord
-    required_num = jt * mt
-    for c1, c2 in agents_coord:
-        blue_nb, red_nb, empty_nb = count_neighbours(lattice, c1, c2, mt)
-        all_nb = blue_nb + red_nb + empty_nb
-        if lattice[c1][c2] == 1:
-            if blue_nb / all_nb < jt:
-                # move the individual to a randomly selected new empty location ????????????????????????
-                pass
-        elif lattice[c1][c2] == 2:
-            if red_nb / all_nb < jt:
-                # move the individual to a randomly selected new empty location ????????????????????????
-                pass
+    global agents_coord
+
+    for c in range(len(agents_coord)):
+        c1, c2 = agents_coord[c]
+        blue_nb, red_nb, empty_nb = count_neighbours(lattice, c1, c2, mb)
+        all_nb = blue_nb + red_nb
+        if all_nb > 0:
+            if (lattice[c1][c2] == 1 and blue_nb / all_nb <= jb) or \
+                    (lattice[c1][c2] == 2 and red_nb / all_nb <= jr):
+                new_c1, new_c2 = move_agent(c1, c2)
+                agents_coord[c] = [new_c1, new_c2]
+
+    mat.set_data(lattice)
+    return mat, lattice
+
+
+def move_agent(c1, c2):
+    N, M = lattice.shape
+
+    new_c1 = rnd.randint(N)
+    new_c2 = rnd.randint(M)
+
+    while lattice[new_c1][new_c2] != 0:
+        new_c1 = rnd.randint(N)
+        new_c2 = rnd.randint(M)
+
+    lattice[new_c1][new_c2] = lattice[c1][c2]
+    lattice[c1][c2] = 0
+    return new_c1, new_c2
 
 
 if __name__ == '__main__':
-    # print(distribute_agents(4, 3))
-    lattice, blue_coord, red_coord = distribute_agents(4, 3)
-    jt, mt = .5, 1
+    lattice, blue_coord, red_coord = distribute_agents(4, 2)
+    agents_coord = np.array(blue_coord + red_coord)
+    jb, mb = .5, 1
+    jr, mr = .5, 1
 
     fig, ax = plt.subplots()
     plt.title('the animation')
