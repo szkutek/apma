@@ -19,7 +19,7 @@ def distribute_agents(N, Nb) -> (np.array, np.array, np.array):
     leftover_coord = [(i0, i1) for i0, i1 in indices if arr[i0][i1] != 1]
 
     choice = rnd.choice(len(leftover_coord), Nr, replace=False)
-    red_coord = [indices[r] for r in choice]
+    red_coord = [leftover_coord[r] for r in choice]
     for r1, r2 in red_coord:
         arr[r1][r2] = 2
 
