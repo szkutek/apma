@@ -141,7 +141,7 @@ L = \sum_{n=1}^{N} u_n^2 = u' u = (y-X\alpha)' (y-X\alpha) = (y'-\alpha' X')(y-X
 \subsection{Part 2}
 Next we will use the following equalities
 \[ \frac{\partial A\beta}{\partial \beta'} = A \qquad \text{and} \qquad  \frac{\partial \beta' A\beta}{\partial \beta'} = \beta'(A+A')\]
-to calculate the first derivative of $L$ with respect to $\alpha$.
+to calculate the first derivative of $L$ with respect to $\alpha'$.
 
 \[ \frac{\partial L(\alpha)}{\partial \alpha'} = 0 - 2y'X + \alpha'(X'X + X'X) = - 2y'X +2 \alpha'X'X. \]
 
@@ -160,16 +160,16 @@ So $\hat{\alpha}  = (X'X)^{-1} X'y$ is the LS estimator of the model parameter.
 
 The first vector is the theoretical estimator of $\alpha$ and the second is the estimator obtained with R's linear regression model:
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 17:51:33 2017
+% Thu Nov 16 15:31:03 2017
 \begin{table}[H]
 \centering
-\begin{tabular}{rlll}
+\begin{tabular}{lll}
   \hline
- &   & theoretical & using lm() \\ 
+  & theoretical & using lm() \\ 
   \hline
-1 & alpha\_1 & 2.05859906656869 & 2.05859906656869 \\ 
-  2 & alpha\_2 & 1.07475575539487 & 1.07475575539487 \\ 
-  3 & alpha\_3 & 0.889740635967315 & 0.889740635967315 \\ 
+alpha\_1 & 2.05859906656869 & 2.05859906656869 \\ 
+  alpha\_2 & 1.07475575539487 & 1.07475575539487 \\ 
+  alpha\_3 & 0.889740635967315 & 0.889740635967315 \\ 
    \hline
 \end{tabular}
 \caption{Estimator of alpha} 
@@ -184,42 +184,31 @@ We are using unbiased estimator for the variance of residuals
 \[ \hat{\sigma}^2 = \frac{u'u}{N-K},\]
 where in our case $N=100$ and $K=3$. 
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 17:51:33 2017
+% Thu Nov 16 15:31:03 2017
 \begin{table}[H]
 \centering
-\begin{tabular}{rrr}
+\begin{tabular}{rr}
   \hline
- & theoretical & using lm() \\ 
+theoretical & using lm() \\ 
   \hline
-1 & 0.80202 & 0.80210 \\ 
+0.80202 & 0.80210 \\ 
    \hline
 \end{tabular}
 \caption{Variance of residuals} 
 \label{tab:table1}
 \end{table}
 
-The first row is the theoretical estimator of $\sigma$ and the second is the squared residual standard error obtained with R's linear regression model.
+The first row is the theoretical estimator of $\sigma^2$ and the second is the squared residual standard error obtained with R's linear regression model function.
 
 
 
 \subsection{Part 5}
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=\maxwidth]{figure/ex1_resid_white_noise-1} 
-
-}
-
-
-
-\end{knitrout}
-
 We assume that the residuals are uncorrelated and homoscedastic. The variance-covariance matrix of LS estimator is
 \[ \hat{\Sigma}_{\hat{\alpha}} = \hat{\sigma}^2 (X'X)^{-1}, \]
-where $\hat{\sigma}^2$ is the variance of the residuals.
+where $\hat{\sigma}^2$ is the estimator of variance of the residuals.
 
-We can calculate the variance-covariance matrix using R:
+We can calculate the variance-covariance matrix using R
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{verbatim}
@@ -234,10 +223,11 @@ We can calculate the variance-covariance matrix using R:
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-where the first result is the theoretical estimator of $\Sigma$ and the second is the one obtained with R's linear regression model.
+The first result is the theoretical estimator of $\Sigma$ and the second is the one obtained with R's linear regression model function.
 
-Variance-covariance matrix for $\sqrt{N}\hat{\alpha}$ is equal to:
-\[ \hat{\Sigma}_{\sqrt{N}\hat{\alpha}} = N\hat{\sigma}^2 (X'X)^{-1}\]
+Variance-covariance matrix for $\sqrt{N}\hat{\alpha}$ is equal to
+\[ \hat{\Sigma}_{\sqrt{N}\hat{\alpha}} = N\hat{\sigma}^2 (X'X)^{-1},\]
+and we can calculate it in R
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{verbatim}
@@ -253,20 +243,19 @@ Variance-covariance matrix for $\sqrt{N}\hat{\alpha}$ is equal to:
 
 \subsection{Part 6}
 The $t$-statistic tests the hypothesis $H_0:\ \alpha_i = 0$, $H_1:\ \alpha_i \neq 0$. The $t$-ratio is the ratio of the sample regression coefficient to its standard error. So
-\[ t_{\hat{\alpha_i}} = \frac{\hat{\alpha_i}}{\sqrt{Var\hat{\alpha_i}}}, \]
-where $t_{\hat{\alpha_i}} \sim t(N-K) = t(100-3) = t(97)$.
+\[ t_{\hat{\alpha_i}} = \frac{\hat{\alpha_i}}{\sqrt{Var\hat{\alpha_i}}} \quad\text{and}\quad t_{\hat{\alpha_i}} \sim t(N-K) = t(100-3) = t(97). \]
 
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 17:51:34 2017
+% Thu Nov 16 15:31:03 2017
 \begin{table}[H]
 \centering
-\begin{tabular}{rlll}
+\begin{tabular}{lll}
   \hline
- &   & theoretical & using lm() \\ 
+  & theoretical & using lm() \\ 
   \hline
-1 & V1 & 30.0016825108455 & 30.0016825108456 \\ 
-  2 & V2 & 15.9924488168616 & 15.9924488168616 \\ 
-  3 & V3 & 11.8539317172235 & 11.8539317172235 \\ 
+t.alpha1.hat & 30.0016825108455 & 30.0016825108456 \\ 
+  t.alpha2.hat & 15.9924488168616 & 15.9924488168616 \\ 
+  t.alpha3.hat & 11.8539317172235 & 11.8539317172235 \\ 
    \hline
 \end{tabular}
 \caption{t-ratios of the parameters} 
@@ -350,7 +339,7 @@ L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha =
   y'y - 2y'X\alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   = \\
-  y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  = y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + \alpha_3^2 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
 \end{gather*}
 
@@ -360,7 +349,7 @@ L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha =
 Estimator of $\alpha_3$ is equal to 
 \[ \hat{\alpha}_3 = \text{arg}\min_{\alpha_3\ \ } L(\alpha_3) \]
 
-Again, we will use the formula $\frac{\partial A\beta}{\partial \beta'} = A$ to calculate 
+We can calculate 
 \[ \frac{\partial L(\alpha_3)}{\partial \alpha_3} = 
   0 - 2 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + 2 \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
@@ -373,7 +362,117 @@ From F.O.C and the above formula we obtain
     y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \left(\begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \right)^{-1}\\
 \end{align*}
 
+For data from exercise 1, this estimator is equal to
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## [1] -0.6334175
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
+Now we can calculate variance of estimator $\hat{\alpha}_3$. Transforming the model as follows, we obtain $u$.
+\begin{align*}
+y & = X\hat{\alpha} + u \\
+y & = \hat{\alpha}_3 X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} + u \\
+u & = y -  \hat{\alpha}_3 X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
+\end{align*}
+
+Let $\tilde{X} = X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}$. Using $\hat{\sigma}^2 = \frac{u'u}{N-K}$ we can calculate the variance-covariance matrix of $\hat{\alpha}_3$, namely $\hat{\Sigma}_{\hat{\alpha}_3} = \hat{\sigma}^2 (\tilde{X}' \tilde{X})^{-1}$.
+The exact value of $\hat{\Sigma}_{\hat{\alpha}_3}$ for our data is equal to
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##         [,1]
+## [1,] 0.23171
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Part 4}
+We know that
+
+\[ 
+  \begin{cases}
+    \hat{\alpha}_1 =-2 \hat{\alpha}_3 \\
+    \hat{\alpha}_2 = \hat{\alpha}_3
+  \end{cases}
+  \quad \Rightarrow \quad
+  \hat{\alpha} = 
+  \begin{bmatrix}  
+      \hat{\alpha}_1 \\ \hat{\alpha}_2 \\ \hat{\alpha}_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \hat{\alpha}_3 \\ \hat{\alpha}_3 \\ \hat{\alpha}_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \\ 1 \\ 1
+  \end{bmatrix} 
+  \hat{\alpha}_3
+\]
+
+and
+
+\[ Var(\hat{\alpha}_1) = Var(-2\hat{\alpha}_3) = 4 Var(\hat{\alpha}_3)\]
+\[ Var(\hat{\alpha}_2) = Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_2,\hat{\alpha}_1) = Cov(\hat{\alpha}_1,\hat{\alpha}_2) = Cov(-2 \hat{\alpha}_3, \hat{\alpha}_3)= -2 Cov(\hat{\alpha}_3, \hat{\alpha}_3)) = 
+  -2 Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_3,\hat{\alpha}_1) = Cov(\hat{\alpha}_1,\hat{\alpha}_3) = Cov(-2 \hat{\alpha}_3, \hat{\alpha}_3) = -2 Cov(\hat{\alpha}_3, \hat{\alpha}_3)) = 
+  -2 Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_2,\hat{\alpha}_3) = Cov(\hat{\alpha}_3,\hat{\alpha}_2) = Cov(\hat{\alpha}_3, \hat{\alpha}_3) = Var(\hat{\alpha}_3) \]
+
+So the variance-covariance matrix of $\alpha$ is as follows
+\begin{gather*}
+\hat{\Sigma}_{\hat{\alpha}} = 
+  \begin{bmatrix}  
+      Var(\hat{\alpha}_1) & Cov(\hat{\alpha}_1,\hat{\alpha}_2) & Cov(\hat{\alpha}_1,\hat{\alpha}_3) \\ 
+      Cov(\hat{\alpha}_2,\hat{\alpha}_1) & Var (\hat{\alpha}_2) & Cov(\hat{\alpha}_2,\hat{\alpha}_3) \\ 
+      Cov(\hat{\alpha}_3,\hat{\alpha}_1) & Cov(\hat{\alpha}_3,\hat{\alpha}_2) & Var (\hat{\alpha}_3)
+  \end{bmatrix} 
+  = \\
+  =
+  Var(\hat{\alpha}_3)
+  \begin{bmatrix}  
+      4  & -2 & -2 \\
+      -2 & 1  & 1 \\
+      -2 & 1  & 1 
+  \end{bmatrix}   
+  =
+  0.23171
+  \begin{bmatrix}  
+      4  & -2 & -2 \\
+      -2 & 1  & 1 \\
+      -2 & 1  & 1 
+  \end{bmatrix} 
+\end{gather*}
+
+
+Now we want to calculate the $t$-ratios for $\hat{\alpha}_i$ ($i=1,2,3$) 
+\[t_{\hat{\alpha}_i} = \frac{\hat{\alpha}_i}{\sqrt{Var\hat{\alpha}_i}}, \] 
+where $t_{\hat{\alpha}_i} \sim t(N-K) = t(100-3) = t(97)$.
+
+\[ t_{\hat{\alpha}_2} = t_{\hat{\alpha}_3} = \frac{\hat{\alpha}_3}{\sqrt{Var(\hat{\alpha}_3})} \]
+\[ t_{\hat{\alpha}_1} = \frac{-2\hat{\alpha}_3}{\sqrt{Var(-2\hat{\alpha}_3)}} = \frac{-2\hat{\alpha}_3}{\sqrt{4 Var(\hat{\alpha}_3)}} = 
+ \frac{-2\hat{\alpha}_3}{2 \sqrt{Var(\hat{\alpha}_3)}} = -t_{\hat{\alpha}_3} \]
+
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Thu Nov 16 15:31:03 2017
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+  \hline
+  \hline
+t.alpha1.hat & 1.31588409531758 \\ 
+  t.alpha2.hat & -1.31588409531758 \\ 
+  t.alpha3.hat & -1.31588409531758 \\ 
+   \hline
+\end{tabular}
+\caption{t-ratios of alpha1.hat, alpha2.hat and alpha1.hat} 
+\label{tab:table3}
+\end{table}
 
 
 
@@ -397,6 +496,14 @@ We will generate samples from above model in two cases:
 \item[a)] $X_{1}$ and $X_{2}$ are independent and $X \sim N(0,I_{2})$,
 \item[b)] $X_{1}$ and $X_{2}$ are dependent and $X \sim N(0,\Sigma)$.
 \end{enumerate}
+We assume that in this exercise 
+\[
+  \Sigma = 
+  \begin{bmatrix}  
+      1 & 0.8 \\ 
+      0.8 & 1
+  \end{bmatrix}.
+\]
 
 
 {\centering \includegraphics[width=\maxwidth]{figure/ex3_1-1} 
@@ -412,38 +519,79 @@ We will generate samples from above model in two cases:
 We have the following models: 
 \[ y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n} \]
 \[ y_{n} = \beta X_{1n}+u_{n} \]
-We will use the formula from subsection \ref{referencja} to obtain $\alpha_{1}$ and $\beta$ in those models. 
+We will use the formula from subsection \ref{referencja} and Monte Carlo method with 1000 repetitions to obtain $\alpha_{1}$ and $\beta$ in those models.
+
 Below we compare the results for different sample sizes.
+
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 17:51:36 2017
+% Thu Nov 16 15:31:05 2017
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrr}
+\begin{tabular}{rrrr}
   \hline
- & N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
+N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
   \hline
-1 & 10.00000 & 1.00000 & 1.01685 & 1.00558 \\ 
-  2 & 100.00000 & 1.00000 & 0.99905 & 1.00060 \\ 
-  3 & 1000.00000 & 1.00000 & 1.00147 & 1.00059 \\ 
+10.00000 & 1.00000 & 0.99509 & 0.99579 \\ 
+  100.00000 & 1.00000 & 0.99811 & 1.00073 \\ 
+  1000.00000 & 1.00000 & 1.00025 & 0.99946 \\ 
    \hline
 \end{tabular}
 \caption{Estimator of alpha1 and beta for model a} 
 \end{table}
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Sun Nov 12 17:51:36 2017
+% Thu Nov 16 15:31:05 2017
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrr}
+\begin{tabular}{rrrr}
   \hline
- & N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
+N & theoretical\_alpha\_1 & alpha\_1\_est & beta\_est \\ 
   \hline
-1 & 10.00000 & 1.00000 & 1.00154 & 1.25233 \\ 
-  2 & 100.00000 & 1.00000 & 0.99924 & 1.25446 \\ 
-  3 & 1000.00000 & 1.00000 & 1.00023 & 1.25047 \\ 
+10.00000 & 1.00000 & 0.98538 & 1.79253 \\ 
+  100.00000 & 1.00000 & 0.99330 & 1.79472 \\ 
+  1000.00000 & 1.00000 & 1.00282 & 1.80132 \\ 
    \hline
 \end{tabular}
-\caption{Estimator of alpha1 and beta for model a} 
+\caption{Estimator of alpha1 and beta for model b} 
 \end{table}
+
+
+
+
+\subsection{Part 4}
+
+Estimator is consistent if
+\[ \hat{\theta} \rightarrow^P \theta. \]
+From assumptions of the Least Squares method we know that  
+\[ \hat{\alpha_1} \rightarrow^P \alpha_1. \]
+But what about $\beta$?
+From \textit{Econometric analysis} by W.H. Greene for 
+\[ y = X_1\alpha_1+X_2\alpha_2 + \varepsilon \]
+we have the following normal equations 
+\[ \begin{bmatrix}  
+      X_1' X_1 & X_1' X_2 \\ 
+      X_2' X_1 & X_2' X_2
+  \end{bmatrix} 
+  \begin{bmatrix}  
+      \alpha_1 \\ 
+      \alpha_2  
+  \end{bmatrix}
+  =
+  \begin{bmatrix}  
+      X_1' y \\ 
+      X_2' y  
+  \end{bmatrix}
+\]
+By manipulating the first equation we get
+\begin{align*}
+\alpha_1 X_1' X_1 + X_1' X_2 \alpha_2 = X_1' y \quad\Rightarrow\quad
+\alpha_1 & = \underbrace{(X_1' X_1)^{-1} X_1' y}_{\hat{\beta}} - (X_1'X_1)^{-1} X_1'X_2\alpha_2 \\
+\alpha_1 & = \hat{\beta} - (X_1'X_1)^{-1} X_1'X_2\alpha_2 
+\end{align*}
+If $(X_1'X_1)^{-1} X_1'X_2\alpha_2$ is convergent to 0 (with probability), then $\hat{\beta} \rightarrow^P \alpha_1$.
+If $X_1'$ and $X_2$ are orthogonal, then $X_1'X_2=0$, and then $\hat{\beta} \rightarrow^P \alpha_1$.
+
+In case (a) $X_1$ and $X_2$ are independent, so they are orthogonal, so $\hat{\beta}$ is consistent.
+In case (b) $X_1$ and $X_2$ are dependent, so they are not orthogonal, so $\hat{\beta}$ is not consistent.
 
 
 

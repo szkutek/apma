@@ -73,7 +73,7 @@ L = \sum_{n=1}^{N} u_n^2 = u' u = (y-X\alpha)' (y-X\alpha) = (y'-\alpha' X')(y-X
 \subsection{Part 2}
 Next we will use the following equalities
 \[ \frac{\partial A\beta}{\partial \beta'} = A \qquad \text{and} \qquad  \frac{\partial \beta' A\beta}{\partial \beta'} = \beta'(A+A')\]
-to calculate the first derivative of $L$ with respect to $\alpha$.
+to calculate the first derivative of $L$ with respect to $\alpha'$.
 
 \[ \frac{\partial L(\alpha)}{\partial \alpha'} = 0 - 2y'X + \alpha'(X'X + X'X) = - 2y'X +2 \alpha'X'X. \]
 
@@ -108,7 +108,7 @@ mat1 <- matrix(c(data.names, alpha.est, alpha.model.est), nrow=length(alpha.est)
 tab1 <- xtable(mat1, digits = 5, row.names = FALSE, 
                caption = "Estimator of alpha", label = "tab:alpha.est")
 names(tab1) <- c(" ", "theoretical", "using lm()")
-print(tab1, type = "latex", table.placement = "H")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 @
 
 
@@ -130,34 +130,21 @@ sigma2.est.unbiased <- t(res) %*% res / (N - K)
 # summary(model) # Residual standard error squared
 
 tab1 <- xtable(matrix(c(sigma2.est.unbiased, 0.8956 ^ 2), 1, 2), 
-               digits = 5, row.names = FALSE, 
-               caption = "Variance of residuals", label = "tab:table1")
+               digits = 5, caption = "Variance of residuals", label = "tab:table1")
 names(tab1) <- c("theoretical", "using lm()")
-print(tab1, type = "latex", table.placement = "H")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 @
-The first row is the theoretical estimator of $\sigma$ and the second is the squared residual standard error obtained with R's linear regression model.
+The first row is the theoretical estimator of $\sigma^2$ and the second is the squared residual standard error obtained with R's linear regression model function.
 
 
 
 \subsection{Part 5}
 
-<<ex1.resid.white.noise, echo=FALSE, eval=TRUE>>=
-data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
-N <- 100
-K <- 3
-X <- as.matrix(data[, -1])
-y <- as.matrix(data[, 1])
-model <- lm(V1 ~ . - 1, data)
-res <- resid(model) # residuals
-
-plot(res)
-@
-
 We assume that the residuals are uncorrelated and homoscedastic. The variance-covariance matrix of LS estimator is
 \[ \hat{\Sigma}_{\hat{\alpha}} = \hat{\sigma}^2 (X'X)^{-1}, \]
-where $\hat{\sigma}^2$ is the variance of the residuals.
+where $\hat{\sigma}^2$ is the estimator of variance of the residuals.
 
-We can calculate the variance-covariance matrix using R:
+We can calculate the variance-covariance matrix using R
 <<ex1.resid.matrix, echo=FALSE, eval=TRUE>>=
 data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
 N <- 100
@@ -178,25 +165,23 @@ cov.alpha.est <- solve(t(X) %*% X) * as.numeric(sigma2.est.unbiased) # matrix of
 cov.alpha.est
 vcov(model)
 @
-where the first result is the theoretical estimator of $\Sigma$ and the second is the one obtained with R's linear regression model.
+The first result is the theoretical estimator of $\Sigma$ and the second is the one obtained with R's linear regression model function.
 
-Variance-covariance matrix for $\sqrt{N}\hat{\alpha}$ is equal to:
-\[ \hat{\Sigma}_{\sqrt{N}\hat{\alpha}} = N\hat{\sigma}^2 (X'X)^{-1}\]
+Variance-covariance matrix for $\sqrt{N}\hat{\alpha}$ is equal to
+\[ \hat{\Sigma}_{\sqrt{N}\hat{\alpha}} = N\hat{\sigma}^2 (X'X)^{-1},\]
+and we can calculate it in R
 <<ex1.resid.matrix.N, echo=FALSE, eval=TRUE>>=
+library(xtable)
 data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
 N <- 100
 K <- 3
 X <- as.matrix(data[, -1])
 y <- as.matrix(data[, 1])
-
 alpha.est <- solve(t(X) %*% X) %*% t(X) %*% y
-
 model <- lm(V1 ~ . - 1, data)
 res <- resid(model) # residuals
-
 # VARIANCE OF RESIDUALS
 sigma2.est.unbiased <- t(res) %*% res / (N - K)
-
 # VARIANCE-COVARIANCE MATRIX OF LS ESTIMATOR
 cov.alpha.est <- solve(t(X) %*% X) * as.numeric(sigma2.est.unbiased) # matrix of estimators
 cov.alpha.est.N <- N * cov.alpha.est
@@ -207,8 +192,7 @@ cov.alpha.est.N
 
 \subsection{Part 6}
 The $t$-statistic tests the hypothesis $H_0:\ \alpha_i = 0$, $H_1:\ \alpha_i \neq 0$. The $t$-ratio is the ratio of the sample regression coefficient to its standard error. So
-\[ t_{\hat{\alpha_i}} = \frac{\hat{\alpha_i}}{\sqrt{Var\hat{\alpha_i}}}, \]
-where $t_{\hat{\alpha_i}} \sim t(N-K) = t(100-3) = t(97)$.
+\[ t_{\hat{\alpha_i}} = \frac{\hat{\alpha_i}}{\sqrt{Var\hat{\alpha_i}}} \quad\text{and}\quad t_{\hat{\alpha_i}} \sim t(N-K) = t(100-3) = t(97). \]
 
 <<ex1.t.ratios, echo=FALSE, eval=TRUE, results='asis'>>=
 data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
@@ -226,11 +210,12 @@ t.ratio.theoretical <- alpha.est / se.alpha.est
 t.ratio.empirical <- summary(model)$coefficients[, 3]
 
 
-mat <- matrix(c("V1", "V2", "V3", t.ratio.theoretical, t.ratio.empirical), nrow=length(t.ratio.theoretical)) 
-tab1 <- xtable(mat, digits = 3, row.names = FALSE,
+mat <- matrix(c("t.alpha1.hat", "t.alpha2.hat", "t.alpha3.hat", 
+                t.ratio.theoretical, t.ratio.empirical), nrow=length(t.ratio.theoretical)) 
+tab1 <- xtable(mat, digits = 3,
                caption = "t-ratios of the parameters", label = "tab:table2")
 names(tab1) <- c(" ", "theoretical", "using lm()")
-print(tab1, type = "latex", table.placement = "H")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 @
 
 
@@ -309,7 +294,7 @@ L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha =
   y'y - 2y'X\alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \alpha_3 \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   = \\
-  y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
+  = y'y - 2\alpha_3 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + \alpha_3^2 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
 \end{gather*}
 
@@ -319,7 +304,7 @@ L(\alpha_3) = y'y - 2y'X\alpha + \alpha'X'X\alpha =
 Estimator of $\alpha_3$ is equal to 
 \[ \hat{\alpha}_3 = \text{arg}\min_{\alpha_3\ \ } L(\alpha_3) \]
 
-Again, we will use the formula $\frac{\partial A\beta}{\partial \beta'} = A$ to calculate 
+We can calculate 
 \[ \frac{\partial L(\alpha_3)}{\partial \alpha_3} = 
   0 - 2 y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
   + 2 \alpha_3 \begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} 
@@ -332,8 +317,140 @@ From F.O.C and the above formula we obtain
     y'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \left(\begin{bmatrix} -2 & 1 & 1 \end{bmatrix} X'X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \right)^{-1}\\
 \end{align*}
 
+For data from exercise 1, this estimator is equal to
+<<ex2.3alpha3.est, echo=FALSE, eval=TRUE>>=
+data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
+N <- 100
+K <- 3
+X <- as.matrix(data[, -1])
+y <- as.matrix(data[, 1])
+model <- lm(V1 ~ . - 1, data)
+res <- resid(model) # residuals
+sigma2.est.unbiased <- t(res) %*% res / (N - K) # variance of residuals
+cov.alpha.est <- solve(t(X) %*% X) * as.numeric(sigma2.est.unbiased) # matrix of estimators
+vc<-c(-2,1,1)
+alpha3.est=t(y)%*%X%*%vc %*%solve(t(vc) %*% t(X) %*% X %*% vc)
+as.numeric(alpha3.est)
+@
+
+Now we can calculate variance of estimator $\hat{\alpha}_3$. Transforming the model as follows, we obtain $u$.
+\begin{align*}
+y & = X\hat{\alpha} + u \\
+y & = \hat{\alpha}_3 X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} + u \\
+u & = y -  \hat{\alpha}_3 X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}
+\end{align*}
+
+Let $\tilde{X} = X \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix}$. Using $\hat{\sigma}^2 = \frac{u'u}{N-K}$ we can calculate the variance-covariance matrix of $\hat{\alpha}_3$, namely $\hat{\Sigma}_{\hat{\alpha}_3} = \hat{\sigma}^2 (\tilde{X}' \tilde{X})^{-1}$.
+The exact value of $\hat{\Sigma}_{\hat{\alpha}_3}$ for our data is equal to
+<<ex2.3alpha3.var, echo=FALSE, eval=TRUE>>=
+data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
+N <- 100
+K <- 3
+X <- as.matrix(data[, -1])
+y <- as.matrix(data[, 1])
+
+vc<-c(-2,1,1)
+alpha3.est <- t(y)%*%X%*%vc %*%solve(t(vc) %*% t(X) %*% X %*% vc)
+
+u <- y - as.numeric(alpha3.est) *(X %*%vc)
+var.u <- t(u)%*%u / (N-K)
+var.alpha3.est <- var.u * (solve( t(X%*%vc) %*% (X%*%vc)))
+var.alpha3.est
+@
 
 
+\subsection{Part 4}
+We know that
+
+\[ 
+  \begin{cases}
+    \hat{\alpha}_1 =-2 \hat{\alpha}_3 \\
+    \hat{\alpha}_2 = \hat{\alpha}_3
+  \end{cases}
+  \quad \Rightarrow \quad
+  \hat{\alpha} = 
+  \begin{bmatrix}  
+      \hat{\alpha}_1 \\ \hat{\alpha}_2 \\ \hat{\alpha}_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \hat{\alpha}_3 \\ \hat{\alpha}_3 \\ \hat{\alpha}_3
+  \end{bmatrix} 
+  =
+  \begin{bmatrix}  
+      -2 \\ 1 \\ 1
+  \end{bmatrix} 
+  \hat{\alpha}_3
+\]
+
+and
+
+\[ Var(\hat{\alpha}_1) = Var(-2\hat{\alpha}_3) = 4 Var(\hat{\alpha}_3)\]
+\[ Var(\hat{\alpha}_2) = Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_2,\hat{\alpha}_1) = Cov(\hat{\alpha}_1,\hat{\alpha}_2) = Cov(-2 \hat{\alpha}_3, \hat{\alpha}_3)= -2 Cov(\hat{\alpha}_3, \hat{\alpha}_3)) = 
+  -2 Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_3,\hat{\alpha}_1) = Cov(\hat{\alpha}_1,\hat{\alpha}_3) = Cov(-2 \hat{\alpha}_3, \hat{\alpha}_3) = -2 Cov(\hat{\alpha}_3, \hat{\alpha}_3)) = 
+  -2 Var(\hat{\alpha}_3) \]
+\[ Cov(\hat{\alpha}_2,\hat{\alpha}_3) = Cov(\hat{\alpha}_3,\hat{\alpha}_2) = Cov(\hat{\alpha}_3, \hat{\alpha}_3) = Var(\hat{\alpha}_3) \]
+
+So the variance-covariance matrix of $\alpha$ is as follows
+\begin{gather*}
+\hat{\Sigma}_{\hat{\alpha}} = 
+  \begin{bmatrix}  
+      Var(\hat{\alpha}_1) & Cov(\hat{\alpha}_1,\hat{\alpha}_2) & Cov(\hat{\alpha}_1,\hat{\alpha}_3) \\ 
+      Cov(\hat{\alpha}_2,\hat{\alpha}_1) & Var (\hat{\alpha}_2) & Cov(\hat{\alpha}_2,\hat{\alpha}_3) \\ 
+      Cov(\hat{\alpha}_3,\hat{\alpha}_1) & Cov(\hat{\alpha}_3,\hat{\alpha}_2) & Var (\hat{\alpha}_3)
+  \end{bmatrix} 
+  = \\
+  =
+  Var(\hat{\alpha}_3)
+  \begin{bmatrix}  
+      4  & -2 & -2 \\
+      -2 & 1  & 1 \\
+      -2 & 1  & 1 
+  \end{bmatrix}   
+  =
+  0.23171
+  \begin{bmatrix}  
+      4  & -2 & -2 \\
+      -2 & 1  & 1 \\
+      -2 & 1  & 1 
+  \end{bmatrix} 
+\end{gather*}
+
+
+Now we want to calculate the $t$-ratios for $\hat{\alpha}_i$ ($i=1,2,3$) 
+\[t_{\hat{\alpha}_i} = \frac{\hat{\alpha}_i}{\sqrt{Var\hat{\alpha}_i}}, \] 
+where $t_{\hat{\alpha}_i} \sim t(N-K) = t(100-3) = t(97)$.
+
+\[ t_{\hat{\alpha}_2} = t_{\hat{\alpha}_3} = \frac{\hat{\alpha}_3}{\sqrt{Var(\hat{\alpha}_3})} \]
+\[ t_{\hat{\alpha}_1} = \frac{-2\hat{\alpha}_3}{\sqrt{Var(-2\hat{\alpha}_3)}} = \frac{-2\hat{\alpha}_3}{\sqrt{4 Var(\hat{\alpha}_3)}} = 
+ \frac{-2\hat{\alpha}_3}{2 \sqrt{Var(\hat{\alpha}_3)}} = -t_{\hat{\alpha}_3} \]
+
+<<ex2.t.ratios, echo=FALSE, eval=TRUE, results='asis'>>=
+data <- read.table('data_lab_2.csv', sep = ",", dec = ",", header = FALSE)
+N <- 100
+K <- 3
+X <- as.matrix(data[, -1])
+y <- as.matrix(data[, 1])
+
+vc<-c(-2,1,1)
+alpha3.est <- t(y)%*%X%*%vc %*%solve(t(vc) %*% t(X) %*% X %*% vc)
+u <- y - as.numeric(alpha3.est) *(X %*%vc)
+var.u <- t(u)%*%u / (N-K)
+
+var.alpha3.est <- var.u * (solve( t(X%*%vc) %*% (X%*%vc)))
+
+se.alpha3.est <- sqrt(var.alpha3.est)
+t3.ratio <- alpha3.est / se.alpha3.est
+t2.ratio <- t3.ratio
+t1.ratio <- -t3.ratio
+
+mat <- matrix(c("t.alpha1.hat", "t.alpha2.hat", "t.alpha3.hat", t1.ratio, t2.ratio, t3.ratio), 3,2) 
+tab1 <- xtable(mat, digits = 3,
+               caption = "t-ratios of alpha1.hat, alpha2.hat and alpha1.hat", label = "tab:table3")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE, include.colnames = FALSE)
+@
 
 
 
@@ -356,6 +473,14 @@ We will generate samples from above model in two cases:
 \item[a)] $X_{1}$ and $X_{2}$ are independent and $X \sim N(0,I_{2})$,
 \item[b)] $X_{1}$ and $X_{2}$ are dependent and $X \sim N(0,\Sigma)$.
 \end{enumerate}
+We assume that in this exercise 
+\[
+  \Sigma = 
+  \begin{bmatrix}  
+      1 & 0.8 \\ 
+      0.8 & 1
+  \end{bmatrix}.
+\]
 <<ex3.1, echo=FALSE, eval=TRUE, results='asis'>>=
 #task 3
 #dot 1, generating model a and b
@@ -371,7 +496,7 @@ par(mfrow=c(2,1),mar=c(3, 4, 3, 3))
 plot(Y_a, main = 'Model a')
 #model b
 epsilon_b <- rnorm(n, mean = 0, sd = 1)
-sigma <- matrix(c(2,0.5,0.5,2),2,2)
+sigma <- matrix(c(1,0.8,0.8,1),2,2)
 X_b <- rmvnorm(n, mean , sigma)
 Y_b <- X_b[,1] + X_b[,2] + epsilon_b
 plot(Y_b, main = 'Model b')
@@ -383,17 +508,18 @@ plot(Y_b, main = 'Model b')
 We have the following models: 
 \[ y_{n} = \alpha_{1}X_{1n}+\alpha_{2}X_{2n}+\varepsilon_{n} \]
 \[ y_{n} = \beta X_{1n}+u_{n} \]
-We will use the formula from subsection \ref{referencja} to obtain $\alpha_{1}$ and $\beta$ in those models. 
+We will use the formula from subsection \ref{referencja} and Monte Carlo method with 1000 repetitions to obtain $\alpha_{1}$ and $\beta$ in those models.
+
 Below we compare the results for different sample sizes.
+
 <<ex3.2, echo=FALSE, eval=TRUE, results='asis'>>=
 #dot 2 and 3
 # computing alpha1 and beta estimators for model a and b
 mean_a <- c(0,0)
 sigma_a <- diag(2) 
 mean_b <- c(0,0)
-sigma_b <- matrix(c(2,0.5,0.5,2),2,2)
+sigma_b <- matrix(c(1,0.8,0.8,1),2,2)
 n <- c(10,100,1000)
-resalts <- matrix(c(2,0.5,0.5,2),2,2)
 alpha_est_a_1 <- integer(3)
 beta_est_a <- integer(3)
 alpha_est_b_1 <- integer(3)
@@ -430,10 +556,49 @@ for (i in n){
 a <- data.frame(N = c(10,100,1000), theoretical_alpha_1 = c(1,1,1), alpha_1_est = alpha_est_a_1, beta_est = beta_est_a)
 b <- data.frame(N = c(10,100,1000), theoretical_alpha_1 = c(1,1,1), alpha_1_est = alpha_est_b_1, beta_est = beta_est_b)
 table_a <- xtable(a, digits = 5, caption = 'Estimator of alpha1 and beta for model a')
-table_b <- xtable(b, digits = 5, caption = 'Estimator of alpha1 and beta for model a')
-print(table_a)
-print(table_b)
+table_b <- xtable(b, digits = 5, caption = 'Estimator of alpha1 and beta for model b')
+print(table_a, include.rownames = FALSE)
+print(table_b, include.rownames = FALSE)
 @
+
+
+
+\subsection{Part 4}
+
+Estimator is consistent if
+\[ \hat{\theta} \rightarrow^P \theta. \]
+From assumptions of the Least Squares method we know that  
+\[ \hat{\alpha_1} \rightarrow^P \alpha_1. \]
+But what about $\beta$?
+From \textit{Econometric analysis} by W.H. Greene for 
+\[ y = X_1\alpha_1+X_2\alpha_2 + \varepsilon \]
+we have the following normal equations 
+\[ \begin{bmatrix}  
+      X_1' X_1 & X_1' X_2 \\ 
+      X_2' X_1 & X_2' X_2
+  \end{bmatrix} 
+  \begin{bmatrix}  
+      \alpha_1 \\ 
+      \alpha_2  
+  \end{bmatrix}
+  =
+  \begin{bmatrix}  
+      X_1' y \\ 
+      X_2' y  
+  \end{bmatrix}
+\]
+By manipulating the first equation we get
+\begin{align*}
+\alpha_1 X_1' X_1 + X_1' X_2 \alpha_2 = X_1' y \quad\Rightarrow\quad
+\alpha_1 & = \underbrace{(X_1' X_1)^{-1} X_1' y}_{\hat{\beta}} - (X_1'X_1)^{-1} X_1'X_2\alpha_2 \\
+\alpha_1 & = \hat{\beta} - (X_1'X_1)^{-1} X_1'X_2\alpha_2 
+\end{align*}
+If $(X_1'X_1)^{-1} X_1'X_2\alpha_2$ is convergent to 0 (with probability), then $\hat{\beta} \rightarrow^P \alpha_1$.
+If $X_1'$ and $X_2$ are orthogonal, then $X_1'X_2=0$, and then $\hat{\beta} \rightarrow^P \alpha_1$.
+
+In case (a) $X_1$ and $X_2$ are independent, so they are orthogonal, so $\hat{\beta}$ is consistent.
+In case (b) $X_1$ and $X_2$ are dependent, so they are not orthogonal, so $\hat{\beta}$ is not consistent.
+
 
 
 
