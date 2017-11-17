@@ -1,11 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random as rnd
-import matplotlib.pyplot as plt
-from matplotlib import animation
+from matplotlib.colors import ListedColormap
 
 
-def distribute_agents(N, Nb) -> (np.array, np.array, np.array):
-    M = 4
+def distribute_agents(M, N, Nb):
     Nr = N - Nb
 
     arr = np.zeros([M, M], int)
@@ -19,7 +18,7 @@ def distribute_agents(N, Nb) -> (np.array, np.array, np.array):
     leftover_coord = [(i0, i1) for i0, i1 in indices if arr[i0][i1] != 1]
 
     choice = rnd.choice(len(leftover_coord), Nr, replace=False)
-    red_coord = [indices[r] for r in choice]
+    red_coord = [leftover_coord[r] for r in choice]
     for r1, r2 in red_coord:
         arr[r1][r2] = 2
 
@@ -46,25 +45,7 @@ def count_neighbours(state, x, y, m):
     return blue, red, empty
 
 
-# def schelling(lattice, blue_coord, red_coord, jb, mb=1):
-def schelling(frame):
-    global agents_coord
-
-    for c in range(len(agents_coord)):
-        c1, c2 = agents_coord[c]
-        blue_nb, red_nb, empty_nb = count_neighbours(lattice, c1, c2, mb)
-        all_nb = blue_nb + red_nb
-        if all_nb > 0:
-            if (lattice[c1][c2] == 1 and blue_nb / all_nb <= jb) or \
-                    (lattice[c1][c2] == 2 and red_nb / all_nb <= jr):
-                new_c1, new_c2 = move_agent(c1, c2)
-                agents_coord[c] = [new_c1, new_c2]
-
-    mat.set_data(lattice)
-    return mat, lattice
-
-
-def move_agent(c1, c2):
+def move_agent(lattice, c1, c2):
     N, M = lattice.shape
 
     new_c1 = rnd.randint(N)
@@ -76,17 +57,72 @@ def move_agent(c1, c2):
 
     lattice[new_c1][new_c2] = lattice[c1][c2]
     lattice[c1][c2] = 0
-    return new_c1, new_c2
+    return lattice, new_c1, new_c2
+
+
+def schelling_algorithm(lattice, agents_coord, jb, mb, jr, mr):
+    changed = True
+    cycles = 0
+    while changed:
+        changed = False
+        for c in range(len(agents_coord)):
+            c1, c2 = agents_coord[c]
+            blue_nb, red_nb, empty_nb = count_neighbours(lattice, c1, c2, mb)
+            all_nb = blue_nb + red_nb
+            if all_nb == 0 or (all_nb > 0
+                               and ((lattice[c1][c2] == 1 and blue_nb / all_nb <= jb)
+                                    or (lattice[c1][c2] == 2 and red_nb / all_nb <= jr))):
+                lattice, new_c1, new_c2 = move_agent(lattice, c1, c2)  # moves agents on the lattice
+                agents_coord[c] = [new_c1, new_c2]
+                changed = True
+        cycles += 1
+
+    return lattice, cycles, agents_coord
+
+
+def segr_index(grid, agent_coord):
+    index = 0.
+    for c1, c2 in agent_coord:
+        blue_nb, red_nb, empty_nb = count_neighbours(grid, c1, c2, 1)
+        all_nb = blue_nb + red_nb
+        if grid[c1][c2] == 1:
+            index += blue_nb / all_nb
+        else:
+            index += red_nb / all_nb
+    return index / len(agent_coord)
+
+
+def schelling(M, N, Nb, jb=.5, mb=1, jr=.5, mr=1):
+    starting_grid, blue_coord, red_coord = distribute_agents(M=M, N=N, Nb=Nb)
+    agents_coord = np.array(blue_coord + red_coord)
+    final_grid, cycles, agents_coord = schelling_algorithm(starting_grid.copy(), agents_coord,
+                                                           jb=jb, mb=mb, jr=jr, mr=mr)
+    return starting_grid, final_grid, cycles, agents_coord
+
+
+def schellings_number_of_iterations(M, N, Nb, jb=.5, mb=1, jr=.5, mr=1):
+    starting_grid, final_grid, cycles, agents_coord = schelling(M, N, Nb, jb, mb, jr, mr)
+    return cycles
+
+
+def schellings_segregation_index(M, N, Nb, jb=.5, mb=1, jr=.5, mr=1):
+    starting_grid, final_grid, cycles, agents_coord = schelling(M, N, Nb, jb, mb, jr, mr)
+    index = segr_index(final_grid, agents_coord)
+    return index
+
+
+def save_schelling_plot(lattice, title='schelling', filename='schelling'):
+    cmap = ListedColormap(['w', 'b', 'r'])
+    fig, ax = plt.subplots()
+    fig.set_size_inches(10, 10)
+    plt.title(title)
+    ax.matshow(lattice, cmap=cmap)
+    plt.savefig(filename + '.png')
+    plt.close()
 
 
 if __name__ == '__main__':
-    lattice, blue_coord, red_coord = distribute_agents(4, 2)
-    agents_coord = np.array(blue_coord + red_coord)
-    jb, mb = .5, 1
-    jr, mr = .5, 1
+    grid1, grid2, cycles, agents_coord = schelling(100, 500, 250)
 
-    fig, ax = plt.subplots()
-    plt.title('the animation')
-    mat = ax.matshow(lattice)
-    ani = animation.FuncAnimation(fig, schelling, interval=500)
-    plt.show()
+    save_schelling_plot(grid1, 'Schelling - starting positions of agents', 'm1000-n500-b250-start')
+    save_schelling_plot(grid2, 'Schelling - final positions of agents', 'm1000-n500-b250-end')
