@@ -1,0 +1,325 @@
+\documentclass[12pt, a4paper]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX packages
+%\usepackage[OT4]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% global settings
+<<global_settings, echo=FALSE, warning=FALSE>>=
+library(knitr)
+library(xtable)
+library(mvtnorm) 
+library(matlib) 
+library(plot3D)
+library(readxl)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+@
+
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% title page
+\title{Estimation theory -- Report 3}
+\author{Marta Frankowska, 208581 \\ Agnieszka Szkutek, 208619}
+\maketitle
+\tableofcontents 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Model}
+In both exercises we will be using the Factor model
+\[ Y_{T\times N} = F_{T\times K} \cdot \lambda_{K\times N} + e_{T\times N},\]
+where 
+\begin{itemize}
+  \item $Y_{T\times N}$ panel of observations
+  \item $F_{T\times K}$ matrix of common (latent) factors
+  \item $\lambda_{K\times N}$ matrix of loadings
+  \item $e_{T\times N}$ panel of specific components
+\end{itemize}
+
+To calculate $F$ and $\lambda$ we use the following formulas:
+\[ \hat{F} = \sqrt{T} V_{1:K} \quad\text{and}\quad \hat{\lambda} = \frac{\hat{F}' Y}{T},\]
+where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eigenvalues.
+
+
+\subsection{Selecting optimal number of factors}
+Notation:
+\begin{itemize}
+  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors
+  \item $e^{(K)}$ - the individual components for $K$ factors
+  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$
+  \item $\hat{\sigma}^2 = V(K_\text{max})$
+\end{itemize}
+
+Information criteria:
+\begin{itemize}
+  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+\end{itemize}
+
+Algorithm:
+\begin{enumerate}
+	\item Set $K_{max}$
+	\item Compute $IC(K)$ for $K = 1...K_{max}$
+	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\le K\le K_{max}} IC(K)$
+\end{enumerate}
+
+
+<<function, echo=TRUE, eval=FALSE>>=
+factor.model.est <- function(Y,K_max) #function returning which K we should choose
+  {
+  T <- nrow(Y)
+  N <- ncol(Y)
+  
+  eigen.decomp <- eigen(Y %*% t(Y)) #  
+  eigen.values <- eigen.decomp$values
+  eigen.vectors <- eigen.decomp$vector
+  
+  # we calculate F, lambda and e for K_max
+  F <- sqrt(T)*eigen.vectors[,1:K_max]
+  lambda <- t(F)%*%Y/T
+  e <- Y - F%*%lambda
+  sigma2.hat <- sum(e^2)/(N*T)
+  
+  PC1 <- 1:K_max
+  IPC1 <- 1:K_max
+  for (K in 1:K_max)
+  {
+   # we calculate F, lambda and e for K
+   F <- sqrt(T)*eigen.vectors[,1:K]
+   lambda <- t(F)%*%Y/T
+   e <- Y - F%*%lambda
+   V <- sum(e^2)/(N*T)
+   # we calculate PC1 and IPC1 for K
+   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
+   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
+  }
+  #we choose minimum for PC1 and IPC1
+  min_PC1 <- min(PC1)
+  min_IPC1 <- min(IPC1)
+  # and looking for corresponding K
+  PC1_K <- which(PC1 == min_PC1)
+  IPC1_K <- which(IPC1 == min_IPC1)
+  return (list(PC1_K,IPC1_K))
+}
+@
+
+\section{Exercise 1}
+We will be using data from file \textit{dataLab3.xlsx}, where $Y$ size is $T\times N = 100\times 100$.
+To calculate the number of factors $K$ we will use function \textit{factor.model.est}.
+
+
+\subsection{Part 1}
+First, we calculate the number of factors for the whole sample. The function returns $\hat{K}=3$ for both $PC_1$ and $IPC_1$.
+Share of explained variance
+\[ \frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i}, \]
+where $\gamma_i$ are the eigenvalues of $Y Y'$. It can be used to choose the number of factors.
+
+The plot shows the variability of the factors
+<<ex1.1, echo=FALSE, eval=TRUE, fig.cap="Share of explained variance depending on K">>=
+Y <- read_excel('dataLab3.xlsx', col_names = FALSE)
+Y <- as.matrix(Y)
+T <- nrow(Y)
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.values <- eigen.decomp$values
+explained_variance <- cumsum(eigen.values) / sum(eigen.values)
+par(mfrow = c(2, 1), mar=c(3, 4, 3, 3))
+plot(
+  1:T,
+  explained_variance,
+  xlab = 'K',
+  ylab = '',
+  type = 'b'
+)
+plot(
+  1:10,
+  explained_variance[1:10],
+  xlab = 'K',
+  ylab = '',
+  type = 'b'
+)
+grid()
+@
+We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8.
+
+
+Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
+<<ex1.table, echo=FALSE, eval=TRUE, results='asis'>>=
+factor.model.est <- function(Y,K_max) #function returning which K we should choose
+  {
+  T <- nrow(Y)
+  N <- ncol(Y)
+  
+  eigen.decomp <- eigen(Y %*% t(Y)) 
+  eigen.values <- eigen.decomp$values
+  eigen.vectors <- eigen.decomp$vector
+  # we calculate F, lambda and e for K_max
+  F <- sqrt(T)*eigen.vectors[,1:K_max]
+  lambda <- t(F)%*%Y/T
+  e <- Y - F%*%lambda
+  sigma2.hat <- sum(e^2)/(N*T)
+  
+  PC1 <- 1:K_max
+  IPC1 <- 1:K_max
+  for (K in 1:K_max)
+  {
+   # we calculate F, lambda and e for K
+   F <- sqrt(T)*eigen.vectors[,1:K]
+   lambda <- t(F)%*%Y/T
+   e <- Y - F%*%lambda
+   V <- sum(e^2)/(N*T)
+   # we calculate PC1 and IPC1 for K
+   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
+   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
+  }
+  #we choose minimum for PC1 and IPC1
+  min_PC1 <- min(PC1)
+  min_IPC1 <- min(IPC1)
+  # and looking for corresponding K
+  PC1_K <- which(PC1 == min_PC1)
+  IPC1_K <- which(IPC1 == min_IPC1)
+  return (list(PC1_K,IPC1_K))
+}
+
+Y <- read_excel('dataLab3.xlsx', col_names = FALSE)
+Y <- as.matrix(Y)
+
+
+f1 <- factor.model.est(Y, 10)
+f2 <- factor.model.est(Y[ ,1:20], 10) 
+f3 <- factor.model.est(Y[1:20, ], 10)
+
+pc1.res <- c(f1[1], f2[1], f3[1])
+ipc1.res <- c(f1[2], f2[2], f3[2])
+
+mat1 <- matrix(c(c("whole sample","first 20 columns","first 20 rows"), pc1.res, ipc1.res), ncol = 3, nrow = 3)
+tab1 <- xtable(mat1, row.names = FALSE, 
+               caption = "Comparison of results", label = "tab:por")
+names(tab1) <- c(" ", "PC1", "IPC1")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
+@
+
+We can observe that ...
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Exercise 2}
+
+In this exercise we will be working with data representing electricity prices from the balancing market. Each row describes the day, whereas the column describes the hour.
+
+\subsection{Part 1}
+We transform the data into logarithms and calculate mean for each column. Then we subtract the mean from each column.
+
+<<ex2.1, echo=TRUE, eval=FALSE>>=
+data2 <- read_excel('RB.xlsx', col_names = FALSE)
+Y <- as.matrix(data2)
+#1
+N <- ncol(Y)
+T <- nrow(Y)
+log_Y <- log(Y)
+new_Y <- sweep(log_Y, 2, colMeans(log_Y))
+@
+
+
+\subsection{Part 2}
+The plot shows the variability of the factors
+<<ex2.2, echo=FALSE, eval=TRUE, fig.cap="Share of explained variance">>=
+data2 <- read_excel('RB.xlsx', col_names = FALSE)
+Y <- as.matrix(data2)
+#1
+N <- ncol(Y)
+T <- nrow(Y)
+log_Y <- log(Y)
+new_Y <- sweep(log_Y, 2, colMeans(log_Y))
+#2
+eigen.decomp <- eigen(new_Y%*%t(new_Y))
+eigen.values <- eigen.decomp$values
+explained_variance <- cumsum(eigen.values)/sum(eigen.values)
+
+par(mfrow = c(2, 1), mar=c(3, 4, 3, 3))
+plot(1:T,explained_variance,xlab = 'K',ylab = '',type = 'b')
+plot(1:10,explained_variance[1:10],xlab = 'K',ylab = '',type = 'b')
+grid()
+@
+
+We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K=4$.
+
+
+\subsection{Part 3}
+We want to compute the information criteria with $K_\text{max}=8$. They suggest the following number of factors:
+<<ex2.3, echo=FALSE, eval=TRUE, results='asis'>>=
+factor.model.est <- function(Y,K_max) #function returning which K we should choose
+  {
+  T <- nrow(Y)
+  N <- ncol(Y)
+  
+  eigen.decomp <- eigen(Y %*% t(Y)) 
+  eigen.values <- eigen.decomp$values
+  eigen.vectors <- eigen.decomp$vector
+  # we calculate F, lambda and e for K_max
+  F <- sqrt(T)*eigen.vectors[,1:K_max]
+  lambda <- t(F)%*%Y/T
+  e <- Y - F%*%lambda
+  sigma2.hat <- sum(e^2)/(N*T)
+  
+  PC1 <- 1:K_max
+  IPC1 <- 1:K_max
+  for (K in 1:K_max)
+  {
+   # we calculate F, lambda and e for K
+   F <- sqrt(T)*eigen.vectors[,1:K]
+   lambda <- t(F)%*%Y/T
+   e <- Y - F%*%lambda
+   V <- sum(e^2)/(N*T)
+   # we calculate PC1 and IPC1 for K
+   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
+   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
+  }
+  #we choose minimum for PC1 and IPC1
+  min_PC1 <- min(PC1)
+  min_IPC1 <- min(IPC1)
+  # and looking for corresponding K
+  PC1_K <- which(PC1 == min_PC1)
+  IPC1_K <- which(IPC1 == min_IPC1)
+  return (list(PC1_K,IPC1_K))
+}
+data2 <- read_excel('RB.xlsx', col_names = FALSE)
+Y <- as.matrix(data2)
+#1
+N <- ncol(Y)
+T <- nrow(Y)
+log_Y <- log(Y)
+new_Y <- sweep(log_Y, 2, colMeans(log_Y))
+#2
+eigen.decomp <- eigen(new_Y%*%t(new_Y))
+eigen.values <- eigen.decomp$values
+explained_variance <- cumsum(eigen.values)/sum(eigen.values)
+
+ic <- factor.model.est(new_Y, 8)
+
+
+tab1 <- xtable(matrix(c(c("PC1", "IPC1"), ic), 2, 2), caption = "Suggested number of factors", label = "tab:2.3.factors")
+names(tab1) <- c(" ", "Suggested no. of factors")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
+@
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

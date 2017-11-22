@@ -1,0 +1,281 @@
+\documentclass[12pt, a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX packages
+%\usepackage[OT4]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% global settings
+
+
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% title page
+\title{Estimation theory -- Report 3}
+\author{Marta Frankowska, 208581 \\ Agnieszka Szkutek, 208619}
+\maketitle
+\tableofcontents 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Model}
+In both exercises we will be using the Factor model
+\[ Y_{T\times N} = F_{T\times K} \cdot \lambda_{K\times N} + e_{T\times N},\]
+where 
+\begin{itemize}
+  \item $Y_{T\times N}$ panel of observations
+  \item $F_{T\times K}$ matrix of common (latent) factors
+  \item $\lambda_{K\times N}$ matrix of loadings
+  \item $e_{T\times N}$ panel of specific components
+\end{itemize}
+
+To calculate $F$ and $\lambda$ we use the following formulas:
+\[ \hat{F} = \sqrt{T} V_{1:K} \quad\text{and}\quad \hat{\lambda} = \frac{\hat{F}' Y}{T},\]
+where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eigenvalues.
+
+
+\subsection{Selecting optimal number of factors}
+Notation:
+\begin{itemize}
+  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors
+  \item $e^{(K)}$ - the individual components for $K$ factors
+  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$
+  \item $\hat{\sigma}^2 = V(K_\text{max})$
+\end{itemize}
+
+Information criteria:
+\begin{itemize}
+  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+\end{itemize}
+
+Algorithm:
+\begin{enumerate}
+	\item Set $K_{max}$
+	\item Compute $IC(K)$ for $K = 1...K_{max}$
+	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\le K\le K_{max}} IC(K)$
+\end{enumerate}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{factor.model.est} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{Y}\hlstd{,}\hlkwc{K_max}\hlstd{)} \hlcom{#function returning which K we should choose}
+  \hlstd{\{}
+  \hlstd{T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
+  \hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y)}
+
+  \hlstd{eigen.decomp} \hlkwb{<-} \hlkwd{eigen}\hlstd{(Y} \hlopt{%*%} \hlkwd{t}\hlstd{(Y))} \hlcom{#  }
+  \hlstd{eigen.values} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{values}
+  \hlstd{eigen.vectors} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{vector}
+
+  \hlcom{# we calculate F, lambda and e for K_max}
+  \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)}\hlopt{*}\hlstd{eigen.vectors[,}\hlnum{1}\hlopt{:}\hlstd{K_max]}
+  \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)}\hlopt{%*%}\hlstd{Y}\hlopt{/}\hlstd{T}
+  \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F}\hlopt{%*%}\hlstd{lambda}
+  \hlstd{sigma2.hat} \hlkwb{<-} \hlkwd{sum}\hlstd{(e}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T)}
+
+  \hlstd{PC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
+  \hlstd{IPC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
+  \hlkwa{for} \hlstd{(K} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{K_max)}
+  \hlstd{\{}
+   \hlcom{# we calculate F, lambda and e for K}
+   \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)}\hlopt{*}\hlstd{eigen.vectors[,}\hlnum{1}\hlopt{:}\hlstd{K]}
+   \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)}\hlopt{%*%}\hlstd{Y}\hlopt{/}\hlstd{T}
+   \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F}\hlopt{%*%}\hlstd{lambda}
+   \hlstd{V} \hlkwb{<-} \hlkwd{sum}\hlstd{(e}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T)}
+   \hlcom{# we calculate PC1 and IPC1 for K}
+   \hlstd{PC1[K]} \hlkwb{<-} \hlstd{V} \hlopt{+} \hlstd{K}\hlopt{*}\hlstd{sigma2.hat}\hlopt{*}\hlstd{((N}\hlopt{+}\hlstd{T)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T))}\hlopt{*}\hlkwd{log}\hlstd{(N}\hlopt{*}\hlstd{T}\hlopt{/}\hlstd{(N}\hlopt{+}\hlstd{T))}
+   \hlstd{IPC1[K]} \hlkwb{<-} \hlkwd{log}\hlstd{(V)} \hlopt{+} \hlstd{K}\hlopt{*}\hlstd{((N}\hlopt{+}\hlstd{T)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T))}\hlopt{*}\hlkwd{log}\hlstd{(N}\hlopt{*}\hlstd{T}\hlopt{/}\hlstd{(N}\hlopt{+}\hlstd{T))}
+  \hlstd{\}}
+  \hlcom{#we choose minimum for PC1 and IPC1}
+  \hlstd{min_PC1} \hlkwb{<-} \hlkwd{min}\hlstd{(PC1)}
+  \hlstd{min_IPC1} \hlkwb{<-} \hlkwd{min}\hlstd{(IPC1)}
+  \hlcom{# and looking for corresponding K}
+  \hlstd{PC1_K} \hlkwb{<-} \hlkwd{which}\hlstd{(PC1} \hlopt{==} \hlstd{min_PC1)}
+  \hlstd{IPC1_K} \hlkwb{<-} \hlkwd{which}\hlstd{(IPC1} \hlopt{==} \hlstd{min_IPC1)}
+  \hlkwd{return} \hlstd{(}\hlkwd{list}\hlstd{(PC1_K,IPC1_K))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\section{Exercise 1}
+We will be using data from file \textit{dataLab3.xlsx}, where $Y$ size is $T\times N = 100\times 100$.
+To calculate the number of factors $K$ we will use function \textit{factor.model.est}.
+
+
+\subsection{Part 1}
+First, we calculate the number of factors for the whole sample. The function returns $\hat{K}=3$ for both $PC_1$ and $IPC_1$.
+Share of explained variance
+\[ \frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i}, \]
+where $\gamma_i$ are the eigenvalues of $Y Y'$. It can be used to choose the number of factors.
+
+The plot shows the variability of the factors
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex1_1-1} 
+
+}
+
+\caption[Share of explained variance depending on K]{Share of explained variance depending on K}\label{fig:ex1.1}
+\end{figure}
+
+
+\end{knitrout}
+We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8.
+
+
+Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Wed Nov 22 15:08:34 2017
+\begin{table}[H]
+\centering
+\begin{tabular}{rrr}
+  \hline
+  & PC1 & IPC1 \\ 
+  \hline
+whole sample & 3.00 & 3.00 \\ 
+  first 20 columns & 9.00 & 3.00 \\ 
+  first 20 rows & 9.00 & 3.00 \\ 
+   \hline
+\end{tabular}
+\caption{Comparison of results} 
+\label{tab:por}
+\end{table}
+
+
+We can observe that ...
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Exercise 2}
+
+In this exercise we will be working with data representing electricity prices from the balancing market. Each row describes the day, whereas the column describes the hour.
+
+\subsection{Part 1}
+We transform the data into logarithms and calculate mean for each column. Then we subtract the mean from each column.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{data2} \hlkwb{<-} \hlkwd{read_excel}\hlstd{(}\hlstr{'RB.xlsx'}\hlstd{,} \hlkwc{col_names} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlstd{Y} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(data2)}
+\hlcom{#1}
+\hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y)}
+\hlstd{T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
+\hlstd{log_Y} \hlkwb{<-} \hlkwd{log}\hlstd{(Y)}
+\hlstd{new_Y} \hlkwb{<-} \hlkwd{sweep}\hlstd{(log_Y,} \hlnum{2}\hlstd{,} \hlkwd{colMeans}\hlstd{(log_Y))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Part 2}
+The plot shows the variability of the factors
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex2_2-1} 
+
+}
+
+\caption[Share of explained variance]{Share of explained variance}\label{fig:ex2.2}
+\end{figure}
+
+
+\end{knitrout}
+
+We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K=4$.
+
+
+\subsection{Part 3}
+We want to compute the information criteria with $K_\text{max}=8$. They suggest the following number of factors:
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Wed Nov 22 15:08:37 2017
+\begin{table}[H]
+\centering
+\begin{tabular}{rr}
+  \hline
+  & Suggested no. of factors \\ 
+  \hline
+PC1 & 8.00 \\ 
+  IPC1 & 8.00 \\ 
+   \hline
+\end{tabular}
+\caption{Suggested number of factors} 
+\label{tab:2.3.factors}
+\end{table}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
