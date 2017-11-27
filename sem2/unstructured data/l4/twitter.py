@@ -13,6 +13,8 @@ import tweepy
 import time
 import json
 from unidecode import unidecode
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 # Twitter account data
 consumer_key = '---'
@@ -51,7 +53,7 @@ def useStdOutListener(query='#Endomondo'):
     stream.filter(track=[query])
 
 
-def search(api, query='#Endomondo', count=100, max_id=''):
+def search(api, query, count, max_id):
     search_res = api.search(q=query, count=count, max_id=max_id)
     res = []
     id_list = []
@@ -67,6 +69,7 @@ def search(api, query='#Endomondo', count=100, max_id=''):
             #             'coordinates': i.place.bounding_box.coordinates})
             #
             if unidecode(i.place.country) == 'United States':
+                # if True:
                 res.append({'country': unidecode(i.place.country),
                             'city': unidecode(i.place.name),
                             'text': i.text,
@@ -91,7 +94,7 @@ def search_for_more_tweets(limit):
     more_tweets = []
 
     while max_id != '0':
-        res, max_id = search(api, query, max_id=max_id)
+        res, max_id = search(api, query, 100, max_id)
         more_tweets += res
         print(len(more_tweets))
         if len(more_tweets) > limit:
@@ -102,41 +105,7 @@ def search_for_more_tweets(limit):
         # return more_tweets
 
 
-def find_lat_lng_google(cities):
-    # Free up to 2,500 requests per day.
-    lat = np.zeros(len(cities))
-    lng = np.zeros(len(cities))
-    url = 'https://maps.googleapis.com/maps/api/geocode/json'
-    i = 0
-    t = 0
-    while i < len(cities):
-        city = cities[i]
-        r = requests.get(url, {'address': city})
-        t += 1
-        print(r.json())
-        if r.json()['status'] == 'OK':
-            location = r.json()['results'][0]['geometry']['location']
-            lat[i] = location['lat']
-            lng[i] = location['lng']
-            i += 1
-            t = 0
-
-        if t > 3:  # if there were more than 3 requests with that city name
-            i += 1
-            t = 0
-    return lat, lng
-
-
-def draw_points_on_map(lat, lng, name='mymap'):
-    """takes lists of lat and lng and file name for the result; draws points on a map"""
-    # TODO for-loop for all sports (different colors)
-    gmap = gmplot.GoogleMapPlotter(25., 15., 3)
-    gmap.scatter(lat, lng, 'cornflowerblue', size=50)
-    gmap.draw(name + '.html')
-
-
 def find_duration(text):
-    hours = 0.
     try:
         duration_format = re.compile('\d*h?:?\d+m:\d+s')
         duration_time = duration_format.findall(text)[0].split(':')  # ['39m', '21s']
@@ -146,7 +115,7 @@ def find_duration(text):
         elif len(duration_time) == 2:
             hours = 1. / 60 * (duration_time[0] + 1 / 60 * duration_time[1])
     except:
-        pass
+        hours = 0.
     return round(hours, 2)
 
 
@@ -155,9 +124,10 @@ def find_distance(text):
         distance_format = re.compile('(\d+.\d+) (km|miles)')
         distance, units = distance_format.findall(text)[0]  # [('6.58', 'km')][0]
         distance = float(distance)
-        return round(distance if units == 'km' else 1.6 * distance, 2)
+        distance = distance if units == 'km' else 1.6 * distance
     except:
-        return 0.
+        distance = 0.
+    return round(distance, 2)
 
 
 def calc_coordinates(coord):
@@ -217,7 +187,7 @@ def parse_results(tweets_data):
     draw_points_on_map(lat, lng)
 
 
-def parse_tweets(data):
+def parse_tweets(data, activity_names, country=None):
     tweets_per_city = {}
 
     for l in data:
@@ -228,20 +198,18 @@ def parse_tweets(data):
             tweets_per_city[l['country']][l['city']] = [(l['text'], coord)]
         else:
             tweets_per_city[l['country']][l['city']].append((l['text'], coord))
-    pprint(tweets_per_city)
+    # pprint(tweets_per_city)
 
     ##
-
-    activity_names = ['Climbing Stairs', 'Cross-Country Skiing', 'Cycling', 'Dancing', 'Fitness Walking', 'Hiking',
-                      'Riding', 'Roller skating', 'Running', 'Skateboarding', 'Skiing', 'Swimming', 'Volleyball',
-                      'Mountain biking', 'Walking']
-    activity_names = map(lambda x: x.lower(), activity_names)
     activity_format = re.compile('(' + '|'.join(activity_names) + ')')
 
     activity_data_for_city = {}
     activity_data_sport = {}
 
     for l in data:
+        if country is not None:
+            if l['country'] != country:
+                break
         text = l['text']
         matched = activity_format.findall(text)
         if matched:
@@ -277,14 +245,71 @@ def parse_tweets(data):
     return activity_data_for_city, activity_data_sport
 
 
-if __name__ == '__main__':
-    # search_for_more_tweets(100)
-    data = json.load(open('data.json', 'r'))
+def find_lat_lng_google(cities):  # not used
+    # Free up to 2,500 requests per day.
+    lat = np.zeros(len(cities))
+    lng = np.zeros(len(cities))
+    url = 'https://maps.googleapis.com/maps/api/geocode/json'
+    i = 0
+    t = 0
+    while i < len(cities):
+        city = cities[i]
+        r = requests.get(url, {'address': city})
+        t += 1
+        print(r.json())
+        if r.json()['status'] == 'OK':
+            location = r.json()['results'][0]['geometry']['location']
+            lat[i] = location['lat']
+            lng[i] = location['lng']
+            i += 1
+            t = 0
 
-    adata_city, adata_sport = parse_tweets(data)
+        if t > 3:  # if there were more than 3 requests with that city name
+            i += 1
+            t = 0
+    return lat, lng
+
+
+def draw_points_on_map(sport_dict, name='mymap'):
+    """takes lists of lat and lng and file name for the result; draws points on a map"""
+    gmap = gmplot.GoogleMapPlotter(25., 15., 3)
+    # TODO for-loop for all sports (different colors)
+    for sport, val in sport_dict.items():  # val = [{'coordinates': c, 'distance': x, 'duration': t}, {}, ...]
+        for d in val:
+            c2, c1 = d['coordinates']
+            gmap.scatter([c1], [c2], col[activity_names.index(sport)], size=50)
+            # gmap.scatter([c1], [c2], 'cornflowerblue', size=50)
+            # gmap.scatter(lat, lng, 'cornflowerblue', size=50)
+    gmap.draw(name + '.html')
+
+
+def pie_plots_per_city(adata_city):
+    pass
+
+
+if __name__ == '__main__':
+    # search_for_more_tweets(1000)
+    data = json.load(open('data1000.json', 'r'))
+    # activity_names = ['Climbing Stairs', 'Cross-Country Skiing', 'Cycling', 'Dancing', 'Fitness Walking', 'Hiking',
+    #                   'Riding', 'Roller skating', 'Running', 'Skateboarding', 'Skiing', 'Swimming', 'Volleyball',
+    #                   'Mountain biking', 'Walking']
+    # activity_names = [*map(lambda x: x.lower(), activity_names)]
+    activity_names = ['swimming', 'cycling', 'running', 'walking']
+
+    #
+    country = 'United States'
+    adata_city, adata_sport = parse_tweets(data, activity_names, country)
     print('\n_______________________________________________________________________________________________\n')
     pprint(adata_city)
     print('\n_______________________________________________________________________________________________\n')
     pprint(adata_sport)
 
-    # parse_results(tweets_per_city)
+    # cmap = plt.get_cmap('viridis')
+    # col = cmap(np.linspace(0, 1, len(activity_names)))
+    # col = [colors.rgb2hex(c) for c in col]
+    col = ['blue', 'indianred', 'darkorange', 'forestgreen']
+    print('Legend:')
+    pprint(dict(zip(activity_names, col)))
+
+    # pie_plots_per_city(adata_city)
+    draw_points_on_map(adata_sport)
