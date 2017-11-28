@@ -1,6 +1,7 @@
 # Endomondo activity areas
 # Collecting tweets published via Endomondo. Visualizing the activity areas on a map.
 # www.endomondo-activity-areas.com
+# FOLIUM
 
 import json
 import re
@@ -10,6 +11,7 @@ import numpy as np
 import tweepy
 from unidecode import unidecode
 from pprint import pprint
+import folium
 
 # https://themepacific.com/how-to-generate-api-key-consumer-token-access-key-for-twitter-oauth/994/
 
@@ -29,7 +31,7 @@ def search(api, query, count, max_id):
     for i in search_res:
         try:
             # i.id, i.user.location, i.place, i.place.name, i.place.bounding_box.coordinates
-            # if unidecode(i.place.country) == 'United States':
+            # if unidecode(i.place.country) == 'Poland':
             res.append({'country': unidecode(i.place.country),
                         'city': unidecode(i.place.name),
                         'text': i.text,
@@ -139,7 +141,6 @@ def parse_tweets(data, activity_names, country=None):
 
 def draw_points_on_map(sport_dict, col, name='worldmap', legend=True, country=None):
     """takes lists of lat and lng and file name for the result; draws points on a map"""
-    # TODO better map would be https://plot.ly/python/scatter-plots-on-maps/
     if legend:
         print('Legend:')
         pprint(list(zip(activity_names, col)))
@@ -161,6 +162,34 @@ def draw_points_on_map(sport_dict, col, name='worldmap', legend=True, country=No
         gmap.draw(country.lower() + '.html')
     else:
         gmap.draw(name + '.html')
+
+
+def draw_points_on_map_folium(sport_dict, col, name='worldmap', legend=True, country=None):
+    """takes lists of lat and lng and file name for the result; draws points on a map"""
+    if legend:
+        print('Legend:')
+        pprint(list(zip(activity_names, col)))
+
+    if country == 'Poland':
+        fmap = folium.Map(location=[51.9194, 19.1451],
+                          zoom_start=7)
+    elif country == 'United States':
+        fmap = folium.Map(location=[37.0902, -95.7129],
+                          zoom_start=5)
+    else:
+        fmap = folium.Map(location=[25., 15.],
+                          zoom_start=3)
+
+    for sport, val in sport_dict.items():  # val = [{'coordinates': c, 'distance': x, 'duration': t}, {}, ...]
+        for d in val:
+            c2, c1 = d['coordinates']
+            color = col[activity_names.index(sport)]
+            size = d['duration'] * 1000 + 100
+            folium.CircleMarker([c1, c2], popup=sport, color=color, radius=size).add_to(fmap)
+    if country:
+        fmap.save(country.lower() + '-folium.html')
+    else:
+        fmap.save(name + '.html')
 
 
 def pie_plots_per_city(cities, adata_city, col, characteristic):
@@ -199,7 +228,8 @@ def plot_pie_charts(data):
 def save_activity_map(country=None):
     adata_city, adata_sport = parse_tweets(data, activity_names, country)
     draw_points_on_map(adata_sport, col, country=country)
-    # pprint(adata_city)
+    print('---------------------------------------')
+    pprint(adata_city)
     # pprint(adata_sport)
 
 
@@ -214,4 +244,4 @@ if __name__ == '__main__':
     save_activity_map('Poland')
     save_activity_map('United States')
 
-    plot_pie_charts(data)
+    # plot_pie_charts(data)
