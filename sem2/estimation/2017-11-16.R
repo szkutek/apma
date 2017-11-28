@@ -15,11 +15,14 @@ plot(eigen.values) # so we take only the 3 most important values
 K <- 5
 F.hat <- sqrt(T) * eigen.vectors[, 1:K]
 lambda.hat <- t(F.hat) %*% Y / T
+heatmap(F.hat)
 
 # portion of explained variance
 explained.variance <- cumsum(eigen.values) / sum(eigen.values)
 plot(1:T, explained.variance, xlab = "K", type = "b")
 grid()
+min(which(explained.variance>0.8))
+
 
 factor.model.est <- function(Y, K) {
   # ...
@@ -27,5 +30,5 @@ factor.model.est <- function(Y, K) {
 }
 
 res <- factor.model.est(Y, K = 2)
-res$F.hat
-res$lambda.hat
+# res$F.hat
+# res$lambda.hat

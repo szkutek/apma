@@ -1,4 +1,4 @@
-setwd("E:/Magisterka/semestr2/ET/Lab3")
+# setwd("E:/Magisterka/semestr2/ET/Lab3")
 library(readxl)
 data1 <- read_excel('dataLab3.xlsx', col_names = FALSE)
 data2 <- read_excel('RB.xlsx', col_names = FALSE)
@@ -39,12 +39,9 @@ factor.model.est <- function(Y, K_max)
     IPC1[K] <-
       log(V) + K * ((N + T) / (N * T)) * log(N * T / (N + T))
   }
-  #we choose minimums
-  min_PC1 <- min(PC1)
-  min_IPC1 <- min(IPC1)
-  # we take the value of K for minimum
-  PC1_K <- which(PC1 == min_PC1)
-  IPC1_K <- which(IPC1 == min_IPC1)
+  # K which gives the minimal value
+  PC1_K <- which.min(PC1)
+  IPC1_K <- which.min(IPC1)
   
   # F.hat <- sqrt(T) * eigen.vectors[, 1:final_K]
   # lambda.hat <- t(F.hat) %*% Y / T
@@ -58,11 +55,11 @@ res <- factor.model.est(Y, 10)
 
 
 
-data1 <- read_excel('dataLab3.xlsx', col_names = FALSE)
-Y <- as.matrix(data1)
-eigen.decomp <- eigen(Y%*%t(Y))
-eigen.values <- eigen.decomp$values
-explained_variance <- cumsum(eigen.values)/sum(eigen.values)
-par(mfrow=c(2,1))
-plot(1:T,explained_variance,xlab = 'K', ylab = '',type = 'b')
-plot(1:10,explained_variance[1:10],xlab = 'K', ylab = '',type = 'b')
+# data1 <- read_excel('dataLab3.xlsx', col_names = FALSE)
+# Y <- as.matrix(data1)
+# eigen.decomp <- eigen(Y%*%t(Y))
+# eigen.values <- eigen.decomp$values
+# explained_variance <- cumsum(eigen.values)/sum(eigen.values)
+# par(mfrow=c(2,1))
+# plot(1:T,explained_variance,xlab = 'K', ylab = '',type = 'b')
+# plot(1:10,explained_variance[1:10],xlab = 'K', ylab = '',type = 'b')

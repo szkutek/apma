@@ -54,28 +54,30 @@ where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eige
 \subsection{Selecting optimal number of factors}
 Notation:
 \begin{itemize}
-  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors
-  \item $e^{(K)}$ - the individual components for $K$ factors
-  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$
-  \item $\hat{\sigma}^2 = V(K_\text{max})$
+  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors,
+  \item $e^{(K)}$ - the individual components for $K$ factors,
+  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$,
+  \item $\hat{\sigma}^2 = V(K_\text{max})$ - consistent estimator of variance.
 \end{itemize}
 
 Information criteria:
 \begin{itemize}
-  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
-  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$,
+  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$.
 \end{itemize}
 
 Algorithm:
 \begin{enumerate}
-	\item Set $K_{max}$
-	\item Compute $IC(K)$ for $K = 1...K_{max}$
-	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\le K\le K_{max}} IC(K)$
+	\item Set $K_\text{max}$;
+	\item Compute $IC(K)$ for $K = 1,\dots,K_\text{max}$;
+	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\leq K\leq K_\text{max}} IC(K)$.
 \end{enumerate}
 
 
 <<function, echo=TRUE, eval=FALSE>>=
-factor.model.est <- function(Y,K_max) #function returning which K we should choose
+# source("functions.R")
+#function returning which K we should choose
+factor.model.est <- function(Y,K_max) 
   {
   T <- nrow(Y)
   N <- ncol(Y)
@@ -154,41 +156,7 @@ We can observe that for $K$ we calculated from Information Criteria, the share o
 
 Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
 <<ex1.table, echo=FALSE, eval=TRUE, results='asis'>>=
-factor.model.est <- function(Y,K_max) #function returning which K we should choose
-  {
-  T <- nrow(Y)
-  N <- ncol(Y)
-  
-  eigen.decomp <- eigen(Y %*% t(Y)) 
-  eigen.values <- eigen.decomp$values
-  eigen.vectors <- eigen.decomp$vector
-  # we calculate F, lambda and e for K_max
-  F <- sqrt(T)*eigen.vectors[,1:K_max]
-  lambda <- t(F)%*%Y/T
-  e <- Y - F%*%lambda
-  sigma2.hat <- sum(e^2)/(N*T)
-  
-  PC1 <- 1:K_max
-  IPC1 <- 1:K_max
-  for (K in 1:K_max)
-  {
-   # we calculate F, lambda and e for K
-   F <- sqrt(T)*eigen.vectors[,1:K]
-   lambda <- t(F)%*%Y/T
-   e <- Y - F%*%lambda
-   V <- sum(e^2)/(N*T)
-   # we calculate PC1 and IPC1 for K
-   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
-   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
-  }
-  #we choose minimum for PC1 and IPC1
-  min_PC1 <- min(PC1)
-  min_IPC1 <- min(IPC1)
-  # and looking for corresponding K
-  PC1_K <- which(PC1 == min_PC1)
-  IPC1_K <- which(IPC1 == min_IPC1)
-  return (list(PC1_K,IPC1_K))
-}
+source("functions.R")
 
 Y <- read_excel('dataLab3.xlsx', col_names = FALSE)
 Y <- as.matrix(Y)
@@ -231,6 +199,21 @@ log_Y <- log(Y)
 new_Y <- sweep(log_Y, 2, colMeans(log_Y))
 @
 
+<<ex2.1, echo=FALSE, eval=TRUE>>=
+data2 <- read_excel('RB.xlsx', col_names = FALSE)
+Y <- as.matrix(data2)
+#1
+N <- ncol(Y)
+T <- nrow(Y)
+log_Y <- log(Y)
+new_Y <- scale(log_Y, center = TRUE, scale = FALSE)
+
+par(mfrow = c(1, 2), oma = c(0, 0, 2, 0))
+boxplot(log_Y)
+boxplot(new_Y)
+mtext("Boxplots for ln(Y) and ln(Y)-mean(ln(Y))", outer = TRUE, cex = 1.5)
+@
+
 
 \subsection{Part 2}
 The plot shows the variability of the factors
@@ -250,6 +233,7 @@ explained_variance <- cumsum(eigen.values)/sum(eigen.values)
 par(mfrow = c(2, 1), mar=c(3, 4, 3, 3))
 plot(1:T,explained_variance,xlab = 'K',ylab = '',type = 'b')
 plot(1:10,explained_variance[1:10],xlab = 'K',ylab = '',type = 'b')
+mtext("Variaility of the factors", outer = TRUE, cex = 1.5)
 grid()
 @
 
@@ -316,6 +300,10 @@ print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 
 
 
+
+\subsection{Part 4}
+
+Loadings = rows in $\lambda$. We take 2 first rows and multiply them by $-1$
 
 
 

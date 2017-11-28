@@ -96,23 +96,23 @@ where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eige
 \subsection{Selecting optimal number of factors}
 Notation:
 \begin{itemize}
-  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors
-  \item $e^{(K)}$ - the individual components for $K$ factors
-  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$
-  \item $\hat{\sigma}^2 = V(K_\text{max})$
+  \item $K = 1,2,\dots,K_\text{max}$ - the number of factors,
+  \item $e^{(K)}$ - the individual components for $K$ factors,
+  \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$,
+  \item $\hat{\sigma}^2 = V(K_\text{max})$ - consistent estimator of variance.
 \end{itemize}
 
 Information criteria:
 \begin{itemize}
-  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
-  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$
+  \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$,
+  \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$.
 \end{itemize}
 
 Algorithm:
 \begin{enumerate}
-	\item Set $K_{max}$
-	\item Compute $IC(K)$ for $K = 1...K_{max}$
-	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\le K\le K_{max}} IC(K)$
+	\item Set $K_\text{max}$;
+	\item Compute $IC(K)$ for $K = 1,\dots,K_\text{max}$;
+	\item Choose $\hat{K}$ such that $IC(\hat{K}) = \min_{1\leq K\leq K_\text{max}} IC(K)$.
 \end{enumerate}
 
 
@@ -188,7 +188,7 @@ We can observe that for $K$ we calculated from Information Criteria, the share o
 
 Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Wed Nov 22 15:08:34 2017
+% Thu Nov 23 11:24:47 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rrr}
@@ -254,7 +254,7 @@ We can observe that if we want to have the Factor model which explains at least 
 \subsection{Part 3}
 We want to compute the information criteria with $K_\text{max}=8$. They suggest the following number of factors:
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Wed Nov 22 15:08:37 2017
+% Thu Nov 23 11:24:50 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rr}
