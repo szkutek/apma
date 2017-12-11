@@ -90,7 +90,7 @@ where
 
 To calculate $F$ and $\lambda$ we use the following formulas:
 \[ \hat{F} = \sqrt{T} V_{1:K} \quad\text{and}\quad \hat{\lambda} = \frac{\hat{F}' Y}{T},\]
-where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eigenvalues.
+where $V_{1:K}$ are eigenvectors of $YY'$ corresponding to the $K$ largest eigenvalues.
 
 
 \subsection{Selecting optimal number of factors}
@@ -101,13 +101,11 @@ Notation:
   \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$,
   \item $\hat{\sigma}^2 = V(K_\text{max})$ - consistent estimator of variance.
 \end{itemize}
-
 Information criteria:
 \begin{itemize}
   \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$,
   \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$.
 \end{itemize}
-
 Algorithm:
 \begin{enumerate}
 	\item Set $K_\text{max}$;
@@ -119,42 +117,51 @@ Algorithm:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{factor.model.est} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{Y}\hlstd{,}\hlkwc{K_max}\hlstd{)} \hlcom{#function returning which K we should choose}
+\hlstd{factor.model.est} \hlkwb{<-}
+  \hlkwa{function}\hlstd{(}\hlkwc{Y}\hlstd{,} \hlkwc{K_max}\hlstd{,} \hlkwc{draw}\hlstd{)} \hlcom{#function returning which K we should choose}
   \hlstd{\{}
-  \hlstd{T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
-  \hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y)}
+    \hlstd{T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
+    \hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y)}
 
-  \hlstd{eigen.decomp} \hlkwb{<-} \hlkwd{eigen}\hlstd{(Y} \hlopt{%*%} \hlkwd{t}\hlstd{(Y))} \hlcom{#  }
-  \hlstd{eigen.values} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{values}
-  \hlstd{eigen.vectors} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{vector}
+    \hlstd{eigen.decomp} \hlkwb{<-} \hlkwd{eigen}\hlstd{(Y} \hlopt{%*%} \hlkwd{t}\hlstd{(Y))}
+    \hlstd{eigen.values} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{values}
+    \hlstd{eigen.vectors} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{vector}
+    \hlcom{# we calculate F, lambda and e for K_max}
+    \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)} \hlopt{*} \hlstd{eigen.vectors[,} \hlnum{1}\hlopt{:}\hlstd{K_max]}
+    \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)} \hlopt{%*%} \hlstd{Y} \hlopt{/} \hlstd{T}
+    \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F} \hlopt{%*%} \hlstd{lambda}
+    \hlstd{sigma2.hat} \hlkwb{<-} \hlkwd{sum}\hlstd{(e} \hlopt{^} \hlnum{2}\hlstd{)} \hlopt{/} \hlstd{(N} \hlopt{*} \hlstd{T)}
 
-  \hlcom{# we calculate F, lambda and e for K_max}
-  \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)}\hlopt{*}\hlstd{eigen.vectors[,}\hlnum{1}\hlopt{:}\hlstd{K_max]}
-  \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)}\hlopt{%*%}\hlstd{Y}\hlopt{/}\hlstd{T}
-  \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F}\hlopt{%*%}\hlstd{lambda}
-  \hlstd{sigma2.hat} \hlkwb{<-} \hlkwd{sum}\hlstd{(e}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T)}
+    \hlstd{PC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
+    \hlstd{IPC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
+    \hlkwa{for} \hlstd{(K} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{K_max)}
+    \hlstd{\{}
+      \hlcom{# we calculate F, lambda and e for K}
+      \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)} \hlopt{*} \hlstd{eigen.vectors[,} \hlnum{1}\hlopt{:}\hlstd{K]}
+      \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)} \hlopt{%*%} \hlstd{Y} \hlopt{/} \hlstd{T}
+      \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F} \hlopt{%*%} \hlstd{lambda}
+      \hlstd{V} \hlkwb{<-} \hlkwd{sum}\hlstd{(e} \hlopt{^} \hlnum{2}\hlstd{)} \hlopt{/} \hlstd{(N} \hlopt{*} \hlstd{T)}
+      \hlcom{# we calculate PC1 and IPC1 for K}
+      \hlstd{PC1[K]} \hlkwb{<-}
+        \hlstd{V} \hlopt{+} \hlstd{K} \hlopt{*} \hlstd{sigma2.hat} \hlopt{*} \hlstd{((N} \hlopt{+} \hlstd{T)} \hlopt{/} \hlstd{(N} \hlopt{*} \hlstd{T))} \hlopt{*} \hlkwd{log}\hlstd{(N} \hlopt{*} \hlstd{T} \hlopt{/} \hlstd{(N} \hlopt{+} \hlstd{T))}
+      \hlstd{IPC1[K]} \hlkwb{<-}
+        \hlkwd{log}\hlstd{(V)} \hlopt{+} \hlstd{K} \hlopt{*} \hlstd{((N} \hlopt{+} \hlstd{T)} \hlopt{/} \hlstd{(N} \hlopt{*} \hlstd{T))} \hlopt{*} \hlkwd{log}\hlstd{(N} \hlopt{*} \hlstd{T} \hlopt{/} \hlstd{(N} \hlopt{+} \hlstd{T))}
+    \hlstd{\}}
+    \hlcom{# choose K which gives the minimal value}
+    \hlstd{PC1_K} \hlkwb{<-} \hlkwd{which.min}\hlstd{(PC1)}
+    \hlstd{IPC1_K} \hlkwb{<-} \hlkwd{which.min}\hlstd{(IPC1)}
 
-  \hlstd{PC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
-  \hlstd{IPC1} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlstd{K_max}
-  \hlkwa{for} \hlstd{(K} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{K_max)}
-  \hlstd{\{}
-   \hlcom{# we calculate F, lambda and e for K}
-   \hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)}\hlopt{*}\hlstd{eigen.vectors[,}\hlnum{1}\hlopt{:}\hlstd{K]}
-   \hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)}\hlopt{%*%}\hlstd{Y}\hlopt{/}\hlstd{T}
-   \hlstd{e} \hlkwb{<-} \hlstd{Y} \hlopt{-} \hlstd{F}\hlopt{%*%}\hlstd{lambda}
-   \hlstd{V} \hlkwb{<-} \hlkwd{sum}\hlstd{(e}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T)}
-   \hlcom{# we calculate PC1 and IPC1 for K}
-   \hlstd{PC1[K]} \hlkwb{<-} \hlstd{V} \hlopt{+} \hlstd{K}\hlopt{*}\hlstd{sigma2.hat}\hlopt{*}\hlstd{((N}\hlopt{+}\hlstd{T)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T))}\hlopt{*}\hlkwd{log}\hlstd{(N}\hlopt{*}\hlstd{T}\hlopt{/}\hlstd{(N}\hlopt{+}\hlstd{T))}
-   \hlstd{IPC1[K]} \hlkwb{<-} \hlkwd{log}\hlstd{(V)} \hlopt{+} \hlstd{K}\hlopt{*}\hlstd{((N}\hlopt{+}\hlstd{T)}\hlopt{/}\hlstd{(N}\hlopt{*}\hlstd{T))}\hlopt{*}\hlkwd{log}\hlstd{(N}\hlopt{*}\hlstd{T}\hlopt{/}\hlstd{(N}\hlopt{+}\hlstd{T))}
+    \hlkwa{if} \hlstd{(draw) \{}
+      \hlstd{max.y} \hlkwb{<-} \hlkwd{max}\hlstd{(}\hlkwd{max}\hlstd{(IPC1),} \hlkwd{max}\hlstd{(PC1))} \hlopt{+} \hlnum{2}
+      \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{),} \hlkwc{mar}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{4}\hlstd{,}\hlnum{4}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{))}
+      \hlkwd{matplot}\hlstd{(}\hlnum{1}\hlopt{:}\hlstd{K_max,} \hlkwd{cbind}\hlstd{(IPC1, PC1),} \hlkwc{pch}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{col}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"blue"}\hlstd{,} \hlstr{"red"}\hlstd{),}
+              \hlkwc{xlab}\hlstd{=}\hlstr{"K"}\hlstd{,} \hlkwc{ylab}\hlstd{=}\hlstr{"IC"}\hlstd{,}
+              \hlkwc{ylim} \hlstd{=} \hlkwd{c}\hlstd{(}\hlkwd{min}\hlstd{(PC1[PC1_K],IPC1[IPC1_K]),}
+                       \hlkwd{max}\hlstd{(}\hlkwd{max}\hlstd{(IPC1),}\hlkwd{max}\hlstd{(PC1))}\hlopt{+}\hlnum{2}\hlstd{))}
+      \hlkwd{legend}\hlstd{(}\hlnum{1}\hlstd{, max.y,} \hlkwd{c}\hlstd{(}\hlstr{"IPC1"}\hlstd{,} \hlstr{"PC1"}\hlstd{),} \hlkwc{col} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"blue"}\hlstd{,} \hlstr{"red"}\hlstd{),} \hlkwc{pch}\hlstd{=}\hlnum{1}\hlstd{)}
+    \hlstd{\}}
+    \hlkwd{return} \hlstd{(}\hlkwd{list}\hlstd{(PC1_K, IPC1_K))}
   \hlstd{\}}
-  \hlcom{#we choose minimum for PC1 and IPC1}
-  \hlstd{min_PC1} \hlkwb{<-} \hlkwd{min}\hlstd{(PC1)}
-  \hlstd{min_IPC1} \hlkwb{<-} \hlkwd{min}\hlstd{(IPC1)}
-  \hlcom{# and looking for corresponding K}
-  \hlstd{PC1_K} \hlkwb{<-} \hlkwd{which}\hlstd{(PC1} \hlopt{==} \hlstd{min_PC1)}
-  \hlstd{IPC1_K} \hlkwb{<-} \hlkwd{which}\hlstd{(IPC1} \hlopt{==} \hlstd{min_IPC1)}
-  \hlkwd{return} \hlstd{(}\hlkwd{list}\hlstd{(PC1_K,IPC1_K))}
-\hlstd{\}}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -165,10 +172,45 @@ To calculate the number of factors $K$ we will use function \textit{factor.model
 
 
 \subsection{Part 1}
-First, we calculate the number of factors for the whole sample. The function returns $\hat{K}=3$ for both $PC_1$ and $IPC_1$.
+First, we calculate the number of factors for the whole sample. 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex1_1_IC-1} 
+
+}
+
+\caption[Information criteria]{Information criteria}\label{fig:ex1.1.IC}
+\end{figure}
+
+
+\end{knitrout}
+The function returns the same $\hat{K}$ for both $PC_1$ and $IPC_1$, it is equal to 
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Fri Dec  1 12:54:26 2017
+\begin{table}[H]
+\centering
+\begin{tabular}{rrr}
+  \hline
+  & PC1 & IPC1 \\ 
+  \hline
+K & 3.00 & 3.00 \\ 
+   \hline
+\end{tabular}
+\caption{K returned for both Information criteria} 
+\label{tab:K}
+\end{table}
+
+
+
+
 Share of explained variance
-\[ \frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i}, \]
-where $\gamma_i$ are the eigenvalues of $Y Y'$. It can be used to choose the number of factors.
+\begin{equation}
+\label{share}
+\frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i},
+\end{equation}
+where $\gamma_i$ are the eigenvalues of $Y Y'$ can also be used to choose the number of factors.
+
 
 The plot shows the variability of the factors
 \begin{knitrout}
@@ -183,12 +225,73 @@ The plot shows the variability of the factors
 
 
 \end{knitrout}
-We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8.
+
+We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8, and to be exact we can calculate it from the formula \eqref{share}:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## [1] 0.8437638
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 
-Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
+We can also say that the results are correct by looking at the eigenvalues
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex1_eigenval-1} 
+
+}
+
+\caption[Eigenvalues of YY']{Eigenvalues of YY'}\label{fig:ex1.eigenval}
+\end{figure}
+
+
+\end{knitrout}
+
+
+
+Now we can calculate $\hat{F}$ and $\hat{\lambda}$
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{source}\hlstd{(}\hlstr{"functions.R"}\hlstd{)}
+\hlstd{Y} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(}\hlkwd{read_excel}\hlstd{(}\hlstr{'dataLab3.xlsx'}\hlstd{,} \hlkwc{col_names} \hlstd{=} \hlnum{FALSE}\hlstd{))}
+\hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y); T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
+\hlstd{K} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{factor.model.est}\hlstd{(Y,} \hlnum{10}\hlstd{,} \hlnum{FALSE}\hlstd{)[}\hlnum{1}\hlstd{])}
+
+\hlstd{eigen.decomp} \hlkwb{<-} \hlkwd{eigen}\hlstd{(Y} \hlopt{%*%} \hlkwd{t}\hlstd{(Y))}
+\hlstd{eigen.vectors} \hlkwb{<-} \hlstd{eigen.decomp}\hlopt{$}\hlstd{vectors}
+\hlstd{F} \hlkwb{<-} \hlkwd{sqrt}\hlstd{(T)} \hlopt{*} \hlstd{eigen.vectors[,} \hlnum{1}\hlopt{:}\hlstd{K]}
+\hlstd{lambda} \hlkwb{<-} \hlkwd{t}\hlstd{(F)} \hlopt{%*%} \hlstd{Y} \hlopt{/} \hlstd{T}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+To check if the results are correct, we can check the following condition
+\[ \frac{F'F}{T}=I \]
+
+We calculate $\frac{F'F}{T}$ and the result is as follows
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##               [,1]         [,2]          [,3]
+## [1,]  1.000000e+00 3.774758e-17 -3.474998e-16
+## [2,]  3.774758e-17 1.000000e+00  2.642331e-16
+## [3,] -3.474998e-16 2.642331e-16  1.000000e+00
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Taking into account the numerical errors we can assume that the above matrix is an identity matrix.
+
+
+
+
+\subsection{Part 2 and 3}
+
+Now we will compare estimated number of factors for the whole sample, the first 20 columns and the first 20 rows.
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Thu Nov 23 11:24:47 2017
+% Fri Dec  1 12:54:26 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rrr}
@@ -205,7 +308,24 @@ whole sample & 3.00 & 3.00 \\
 \end{table}
 
 
-We can observe that ...
+We can observe that the results from $IPC_1$ and $PC_1$ differ depending on the size of the data.
+In particular for the sample of the first 20 columns the Information criteria look as follows
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex1_ic20-1} 
+
+}
+
+\caption[Information criteria for the first 20 columns]{Information criteria for the first 20 columns}\label{fig:ex1.ic20}
+\end{figure}
+
+
+\end{knitrout}
+
+
+
 
 
 
@@ -221,16 +341,25 @@ We transform the data into logarithms and calculate mean for each column. Then w
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{data2} \hlkwb{<-} \hlkwd{read_excel}\hlstd{(}\hlstr{'RB.xlsx'}\hlstd{,} \hlkwc{col_names} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlstd{Y} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(data2)}
-\hlcom{#1}
-\hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y)}
-\hlstd{T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
-\hlstd{log_Y} \hlkwb{<-} \hlkwd{log}\hlstd{(Y)}
-\hlstd{new_Y} \hlkwb{<-} \hlkwd{sweep}\hlstd{(log_Y,} \hlnum{2}\hlstd{,} \hlkwd{colMeans}\hlstd{(log_Y))}
+\hlstd{Y} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(}\hlkwd{read_excel}\hlstd{(}\hlstr{'RB.xlsx'}\hlstd{,} \hlkwc{col_names} \hlstd{=} \hlnum{FALSE}\hlstd{))}
+\hlstd{N} \hlkwb{<-} \hlkwd{ncol}\hlstd{(Y); T} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Y)}
+\hlstd{Y} \hlkwb{<-} \hlkwd{scale}\hlstd{(}\hlkwd{log}\hlstd{(Y),} \hlkwc{center} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{scale} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex2_1_2-1} 
+
+}
+
+
+
+\end{knitrout}
+
+
 
 
 \subsection{Part 2}
@@ -248,13 +377,39 @@ The plot shows the variability of the factors
 
 \end{knitrout}
 
-We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K=4$.
+We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K$ equal to
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## [1] 4
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Now we can calculate $\hat{F}$ and $\hat{\lambda}$ and check the following condition
+\[ \frac{F'F}{T}=I. \]
+We calculate $\frac{F'F}{T}$ and the result is as follows
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##               [,1]          [,2]          [,3]          [,4]
+## [1,]  1.000000e+00 -2.754477e-17  8.460181e-17  1.048388e-16
+## [2,] -2.754477e-17  1.000000e+00 -3.147974e-17 -1.433453e-16
+## [3,]  8.460181e-17 -3.147974e-17  1.000000e+00 -4.216037e-17
+## [4,]  1.048388e-16 -1.433453e-16 -4.216037e-17  1.000000e+00
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Taking into account the numerical errors we can assume that the above matrix is an identity matrix.
+
+
 
 
 \subsection{Part 3}
 We want to compute the information criteria with $K_\text{max}=8$. They suggest the following number of factors:
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Thu Nov 23 11:24:50 2017
+% Fri Dec  1 12:54:31 2017
 \begin{table}[H]
 \centering
 \begin{tabular}{rr}
@@ -270,10 +425,38 @@ PC1 & 8.00 \\
 \end{table}
 
 
+What is more, if we increase $K_\text{max}$ the Information criteria will return the following results
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=\maxwidth]{figure/ex2_p3-1} 
+
+}
+
+\caption[Information criteria for increased $K_{max}$]{Information criteria for increased $K_{max}$}\label{fig:ex2.p3}
+\end{figure}
+
+
+\end{knitrout}
+The bigger $K_\text{max}$ we take then the bigger $K$ is returned from Information criteria. So we concluded that Information criteria don't work in this case.
 
 
 
+\subsection{Part 4}
+Since Information criteria don't work for this data, we take $K$ calculated from share of explained variance. We are going to plot loadings of the first two factors. We change signs of values in $\lambda$ and $F$, so that values in $\lambda$ in 17th column are non-negative.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
 
+{\centering \includegraphics[width=\maxwidth]{figure/ex2_loadings-1} 
+
+}
+
+\caption[Factor loadings for K=4]{Factor loadings for K=4}\label{fig:ex2.loadings}
+\end{figure}
+
+
+\end{knitrout}
+Factor 1 describes the noon peak and Factor 2 describes lower prices of electricity at night.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

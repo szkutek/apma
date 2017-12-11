@@ -20,7 +20,7 @@ library(mvtnorm)
 library(matlib) 
 library(plot3D)
 library(readxl)
-opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=7, fig.height=4)
 @
 
 
@@ -48,7 +48,7 @@ where
 
 To calculate $F$ and $\lambda$ we use the following formulas:
 \[ \hat{F} = \sqrt{T} V_{1:K} \quad\text{and}\quad \hat{\lambda} = \frac{\hat{F}' Y}{T},\]
-where $V_{1:K}$ are eigen vectors of $YY'$ corresponding to the $K$ largest eigenvalues.
+where $V_{1:K}$ are eigenvectors of $YY'$ corresponding to the $K$ largest eigenvalues.
 
 
 \subsection{Selecting optimal number of factors}
@@ -59,13 +59,11 @@ Notation:
   \item $V(K) = \frac{1}{NT}\sum_{t=1}^{T} \sum_{i=1}^{N} \left( e^{(K)}_{t i} \right)^2$,
   \item $\hat{\sigma}^2 = V(K_\text{max})$ - consistent estimator of variance.
 \end{itemize}
-
 Information criteria:
 \begin{itemize}
   \item $PC_1(K) = V(K) + K \hat{\sigma}^2 \frac{N+T}{NT} \ln{\frac{NT}{N+T}}$,
   \item $IPC_1(K) = \log{V(K)} + K\frac{N+T}{NT} \ln{\frac{NT}{N+T}}$.
 \end{itemize}
-
 Algorithm:
 \begin{enumerate}
 	\item Set $K_\text{max}$;
@@ -75,44 +73,51 @@ Algorithm:
 
 
 <<function, echo=TRUE, eval=FALSE>>=
-# source("functions.R")
-#function returning which K we should choose
-factor.model.est <- function(Y,K_max) 
+factor.model.est <-
+  function(Y, K_max, draw) #function returning which K we should choose
   {
-  T <- nrow(Y)
-  N <- ncol(Y)
-  
-  eigen.decomp <- eigen(Y %*% t(Y)) #  
-  eigen.values <- eigen.decomp$values
-  eigen.vectors <- eigen.decomp$vector
-  
-  # we calculate F, lambda and e for K_max
-  F <- sqrt(T)*eigen.vectors[,1:K_max]
-  lambda <- t(F)%*%Y/T
-  e <- Y - F%*%lambda
-  sigma2.hat <- sum(e^2)/(N*T)
-  
-  PC1 <- 1:K_max
-  IPC1 <- 1:K_max
-  for (K in 1:K_max)
-  {
-   # we calculate F, lambda and e for K
-   F <- sqrt(T)*eigen.vectors[,1:K]
-   lambda <- t(F)%*%Y/T
-   e <- Y - F%*%lambda
-   V <- sum(e^2)/(N*T)
-   # we calculate PC1 and IPC1 for K
-   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
-   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
+    T <- nrow(Y)
+    N <- ncol(Y)
+    
+    eigen.decomp <- eigen(Y %*% t(Y))
+    eigen.values <- eigen.decomp$values
+    eigen.vectors <- eigen.decomp$vector
+    # we calculate F, lambda and e for K_max
+    F <- sqrt(T) * eigen.vectors[, 1:K_max]
+    lambda <- t(F) %*% Y / T
+    e <- Y - F %*% lambda
+    sigma2.hat <- sum(e ^ 2) / (N * T)
+    
+    PC1 <- 1:K_max
+    IPC1 <- 1:K_max
+    for (K in 1:K_max)
+    {
+      # we calculate F, lambda and e for K
+      F <- sqrt(T) * eigen.vectors[, 1:K]
+      lambda <- t(F) %*% Y / T
+      e <- Y - F %*% lambda
+      V <- sum(e ^ 2) / (N * T)
+      # we calculate PC1 and IPC1 for K
+      PC1[K] <-
+        V + K * sigma2.hat * ((N + T) / (N * T)) * log(N * T / (N + T))
+      IPC1[K] <-
+        log(V) + K * ((N + T) / (N * T)) * log(N * T / (N + T))
+    }
+    # choose K which gives the minimal value
+    PC1_K <- which.min(PC1)
+    IPC1_K <- which.min(IPC1)
+    
+    if (draw) {
+      max.y <- max(max(IPC1), max(PC1)) + 2
+      par(mfrow = c(1,1), mar=c(4,4,1,2))
+      matplot(1:K_max, cbind(IPC1, PC1), pch=1, col=c("blue", "red"), 
+              xlab="K", ylab="IC", 
+              ylim = c(min(PC1[PC1_K],IPC1[IPC1_K]), 
+                       max(max(IPC1),max(PC1))+2))
+      legend(1, max.y, c("IPC1", "PC1"), col = c("blue", "red"), pch=1)
+    }
+    return (list(PC1_K, IPC1_K))
   }
-  #we choose minimum for PC1 and IPC1
-  min_PC1 <- min(PC1)
-  min_IPC1 <- min(IPC1)
-  # and looking for corresponding K
-  PC1_K <- which(PC1 == min_PC1)
-  IPC1_K <- which(IPC1 == min_IPC1)
-  return (list(PC1_K,IPC1_K))
-}
 @
 
 \section{Exercise 1}
@@ -121,10 +126,36 @@ To calculate the number of factors $K$ we will use function \textit{factor.model
 
 
 \subsection{Part 1}
-First, we calculate the number of factors for the whole sample. The function returns $\hat{K}=3$ for both $PC_1$ and $IPC_1$.
+First, we calculate the number of factors for the whole sample. 
+<<ex1.1.IC, echo=FALSE, eval=TRUE, fig.cap="Information criteria">>=
+source("functions.R")
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+K <- factor.model.est(Y, 10, TRUE)
+@
+The function returns the same $\hat{K}$ for both $PC_1$ and $IPC_1$, it is equal to 
+<<ex1.1.IC_K, echo=FALSE, eval=TRUE, results='asis'>>=
+source("functions.R")
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+K <- factor.model.est(Y, 10, FALSE)
+
+mat1 <- matrix(c("K",K), ncol = 3, nrow = 1)
+tab1 <- xtable(mat1, row.names = FALSE, 
+               caption = "K returned for both Information criteria", label = "tab:K")
+names(tab1) <- c(" ", "PC1", "IPC1")
+print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
+@
+
+
+
 Share of explained variance
-\[ \frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i}, \]
-where $\gamma_i$ are the eigenvalues of $Y Y'$. It can be used to choose the number of factors.
+\begin{equation}
+\label{share}
+\frac{\sum_{i=1}^{K} \gamma_i }{\sum_{i=1}^{T} \gamma_i},
+\end{equation}
+where $\gamma_i$ are the eigenvalues of $Y Y'$ can also be used to choose the number of factors.
+
 
 The plot shows the variability of the factors
 <<ex1.1, echo=FALSE, eval=TRUE, fig.cap="Share of explained variance depending on K">>=
@@ -134,7 +165,7 @@ T <- nrow(Y)
 eigen.decomp <- eigen(Y %*% t(Y))
 eigen.values <- eigen.decomp$values
 explained_variance <- cumsum(eigen.values) / sum(eigen.values)
-par(mfrow = c(2, 1), mar=c(3, 4, 3, 3))
+par(mfrow = c(2, 1), mar=c(4,4,1,2))
 plot(
   1:T,
   explained_variance,
@@ -151,20 +182,73 @@ plot(
 )
 grid()
 @
-We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8.
+
+We can observe that for $K$ we calculated from Information Criteria, the share of explained variance is more than 0.8, and to be exact we can calculate it from the formula \eqref{share}:
+<<ex1.1.share, echo=FALSE, eval=TRUE>>=
+source("functions.R")
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.values <- eigen.decomp$values
+K <- as.numeric(factor.model.est(Y, 10, FALSE)[1])
+sum(eigen.values[1:K])/sum(eigen.values)
+@
 
 
-Now we will compare estimated number of factors for the whoe sample, the first 20 columns and the first 20 rows.
+We can also say that the results are correct by looking at the eigenvalues
+<<ex1.eigenval, echo=FALSE, eval=TRUE, fig.cap="Eigenvalues of YY'">>=
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.values <- eigen.decomp$values
+plot(eigen.values, col = "blue")
+@
+
+
+
+Now we can calculate $\hat{F}$ and $\hat{\lambda}$
+<<ex1.1.F.lamba, echo=TRUE, eval=TRUE>>=
+source("functions.R")
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+K <- as.numeric(factor.model.est(Y, 10, FALSE)[1])
+
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.vectors <- eigen.decomp$vectors
+F <- sqrt(T) * eigen.vectors[, 1:K]
+lambda <- t(F) %*% Y / T
+@
+To check if the results are correct, we can check the following condition
+\[ \frac{F'F}{T}=I \]
+
+We calculate $\frac{F'F}{T}$ and the result is as follows
+<<ex1.1.check, echo=FALSE, eval=TRUE>>=
+source("functions.R")
+Y <- as.matrix(read_excel('dataLab3.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+K <- as.numeric(factor.model.est(Y, 10, FALSE)[1])
+
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.vectors <- eigen.decomp$vectors
+F <- sqrt(T) * eigen.vectors[, 1:K]
+lambda <- t(F) %*% Y / T
+t(F) %*% F / T
+@
+Taking into account the numerical errors we can assume that the above matrix is an identity matrix.
+
+
+
+
+\subsection{Part 2 and 3}
+
+Now we will compare estimated number of factors for the whole sample, the first 20 columns and the first 20 rows.
 <<ex1.table, echo=FALSE, eval=TRUE, results='asis'>>=
 source("functions.R")
 
 Y <- read_excel('dataLab3.xlsx', col_names = FALSE)
 Y <- as.matrix(Y)
 
-
-f1 <- factor.model.est(Y, 10)
-f2 <- factor.model.est(Y[ ,1:20], 10) 
-f3 <- factor.model.est(Y[1:20, ], 10)
+f1 <- factor.model.est(Y, 10, FALSE)
+f2 <- factor.model.est(Y[ ,1:20], 10, FALSE) 
+f3 <- factor.model.est(Y[1:20, ], 10, FALSE)
 
 pc1.res <- c(f1[1], f2[1], f3[1])
 ipc1.res <- c(f1[2], f2[2], f3[2])
@@ -176,7 +260,18 @@ names(tab1) <- c(" ", "PC1", "IPC1")
 print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 @
 
-We can observe that ...
+We can observe that the results from $IPC_1$ and $PC_1$ differ depending on the size of the data.
+In particular for the sample of the first 20 columns the Information criteria look as follows
+
+<<ex1.ic20, echo=FALSE, eval=TRUE, fig.cap="Information criteria for the first 20 columns">>=
+source("functions.R")
+Y <- read_excel('dataLab3.xlsx', col_names = FALSE)
+Y <- as.matrix(Y)
+f2 <- factor.model.est(Y[ ,1:20], 10, TRUE)
+@
+
+
+
 
 
 
@@ -190,122 +285,145 @@ In this exercise we will be working with data representing electricity prices fr
 We transform the data into logarithms and calculate mean for each column. Then we subtract the mean from each column.
 
 <<ex2.1, echo=TRUE, eval=FALSE>>=
-data2 <- read_excel('RB.xlsx', col_names = FALSE)
-Y <- as.matrix(data2)
-#1
-N <- ncol(Y)
-T <- nrow(Y)
-log_Y <- log(Y)
-new_Y <- sweep(log_Y, 2, colMeans(log_Y))
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
 @
 
-<<ex2.1, echo=FALSE, eval=TRUE>>=
-data2 <- read_excel('RB.xlsx', col_names = FALSE)
-Y <- as.matrix(data2)
-#1
-N <- ncol(Y)
-T <- nrow(Y)
-log_Y <- log(Y)
-new_Y <- scale(log_Y, center = TRUE, scale = FALSE)
+<<ex2.1.2, echo=FALSE, eval=TRUE, fig.width=7, fig.height=5>>=
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+new_Y <- scale(log(Y), center = TRUE, scale = FALSE)
 
-par(mfrow = c(1, 2), oma = c(0, 0, 2, 0))
-boxplot(log_Y)
+par(mfrow = c(1, 2), oma = c(0, 0, 2, 0), mar=c(4, 4, 1, 2))
+boxplot(log(Y))
 boxplot(new_Y)
 mtext("Boxplots for ln(Y) and ln(Y)-mean(ln(Y))", outer = TRUE, cex = 1.5)
 @
 
 
+
+
 \subsection{Part 2}
 The plot shows the variability of the factors
-<<ex2.2, echo=FALSE, eval=TRUE, fig.cap="Share of explained variance">>=
-data2 <- read_excel('RB.xlsx', col_names = FALSE)
-Y <- as.matrix(data2)
-#1
-N <- ncol(Y)
-T <- nrow(Y)
-log_Y <- log(Y)
-new_Y <- sweep(log_Y, 2, colMeans(log_Y))
-#2
-eigen.decomp <- eigen(new_Y%*%t(new_Y))
+<<ex2.2, echo=FALSE, eval=TRUE, fig.cap="Share of explained variance", fig.width=7, fig.height=5>>=
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
+
+eigen.decomp <- eigen(Y%*%t(Y))
 eigen.values <- eigen.decomp$values
 explained_variance <- cumsum(eigen.values)/sum(eigen.values)
 
-par(mfrow = c(2, 1), mar=c(3, 4, 3, 3))
+par(mfrow = c(2, 1), mar=c(4,4,1,2))
 plot(1:T,explained_variance,xlab = 'K',ylab = '',type = 'b')
 plot(1:10,explained_variance[1:10],xlab = 'K',ylab = '',type = 'b')
-mtext("Variaility of the factors", outer = TRUE, cex = 1.5)
+mtext("Variability of the factors", outer = TRUE, cex = 1.5)
 grid()
 @
 
-We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K=4$.
+We can observe that if we want to have the Factor model which explains at least $80\%$ of panel variability, we have to choose $K$ equal to
+
+<<ex2.2K, echo=FALSE, eval=TRUE>>=
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
+
+eigen.decomp <- eigen(Y%*%t(Y))
+eigen.values <- eigen.decomp$values
+explained.variance <- cumsum(eigen.values)/sum(eigen.values)
+
+min(which(explained.variance>=0.8))
+@
+
+Now we can calculate $\hat{F}$ and $\hat{\lambda}$ and check the following condition
+\[ \frac{F'F}{T}=I. \]
+We calculate $\frac{F'F}{T}$ and the result is as follows
+<<ex2.K, echo=FALSE, eval=TRUE>>=
+source("functions.R")
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
+
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.vectors <- eigen.decomp$vectors
+eigen.values <- eigen.decomp$values
+explained.variance <- cumsum(eigen.values)/sum(eigen.values)
+
+K <- min(which(explained.variance>=0.8))
+
+F <- sqrt(T) * eigen.vectors[, 1:K]
+lambda <- t(F) %*% Y / T
+
+t(F) %*% F / T
+@
+Taking into account the numerical errors we can assume that the above matrix is an identity matrix.
+
+
 
 
 \subsection{Part 3}
 We want to compute the information criteria with $K_\text{max}=8$. They suggest the following number of factors:
 <<ex2.3, echo=FALSE, eval=TRUE, results='asis'>>=
-factor.model.est <- function(Y,K_max) #function returning which K we should choose
-  {
-  T <- nrow(Y)
-  N <- ncol(Y)
-  
-  eigen.decomp <- eigen(Y %*% t(Y)) 
-  eigen.values <- eigen.decomp$values
-  eigen.vectors <- eigen.decomp$vector
-  # we calculate F, lambda and e for K_max
-  F <- sqrt(T)*eigen.vectors[,1:K_max]
-  lambda <- t(F)%*%Y/T
-  e <- Y - F%*%lambda
-  sigma2.hat <- sum(e^2)/(N*T)
-  
-  PC1 <- 1:K_max
-  IPC1 <- 1:K_max
-  for (K in 1:K_max)
-  {
-   # we calculate F, lambda and e for K
-   F <- sqrt(T)*eigen.vectors[,1:K]
-   lambda <- t(F)%*%Y/T
-   e <- Y - F%*%lambda
-   V <- sum(e^2)/(N*T)
-   # we calculate PC1 and IPC1 for K
-   PC1[K] <- V + K*sigma2.hat*((N+T)/(N*T))*log(N*T/(N+T))
-   IPC1[K] <- log(V) + K*((N+T)/(N*T))*log(N*T/(N+T))
-  }
-  #we choose minimum for PC1 and IPC1
-  min_PC1 <- min(PC1)
-  min_IPC1 <- min(IPC1)
-  # and looking for corresponding K
-  PC1_K <- which(PC1 == min_PC1)
-  IPC1_K <- which(IPC1 == min_IPC1)
-  return (list(PC1_K,IPC1_K))
-}
-data2 <- read_excel('RB.xlsx', col_names = FALSE)
-Y <- as.matrix(data2)
-#1
-N <- ncol(Y)
-T <- nrow(Y)
-log_Y <- log(Y)
-new_Y <- sweep(log_Y, 2, colMeans(log_Y))
+source("functions.R")
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
 #2
-eigen.decomp <- eigen(new_Y%*%t(new_Y))
+eigen.decomp <- eigen(Y%*%t(Y))
 eigen.values <- eigen.decomp$values
 explained_variance <- cumsum(eigen.values)/sum(eigen.values)
 
-ic <- factor.model.est(new_Y, 8)
-
+ic <- factor.model.est(Y, 8, FALSE)
 
 tab1 <- xtable(matrix(c(c("PC1", "IPC1"), ic), 2, 2), caption = "Suggested number of factors", label = "tab:2.3.factors")
 names(tab1) <- c(" ", "Suggested no. of factors")
 print(tab1, type = "latex", table.placement = "H", include.rownames = FALSE)
 @
 
+What is more, if we increase $K_\text{max}$ the Information criteria will return the following results
+<<ex2.p3, echo=FALSE, eval=TRUE, fig.cap="Information criteria for increased $K_{max}$">>=
+source("functions.R")
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
+
+K <- factor.model.est(Y, 20, TRUE)
+@
+The bigger $K_\text{max}$ we take then the bigger $K$ is returned from Information criteria. So we concluded that Information criteria don't work in this case.
 
 
 
 \subsection{Part 4}
+Since Information criteria don't work for this data, we take $K$ calculated from share of explained variance. We are going to plot loadings of the first two factors. We change signs of values in $\lambda$ and $F$, so that values in $\lambda$ in 17th column are non-negative.
+<<ex2.loadings, echo=FALSE, eval=TRUE, fig.cap="Factor loadings for K=4">>=
+source("functions.R")
+Y <- as.matrix(read_excel('RB.xlsx', col_names = FALSE))
+N <- ncol(Y); T <- nrow(Y)
+Y <- scale(log(Y), center = TRUE, scale = FALSE)
 
-Loadings = rows in $\lambda$. We take 2 first rows and multiply them by $-1$
+eigen.decomp <- eigen(Y %*% t(Y))
+eigen.vectors <- eigen.decomp$vectors
+eigen.values <- eigen.decomp$values
+explained.variance <- cumsum(eigen.values)/sum(eigen.values)
+K <- min(which(explained.variance>=0.8))
 
+F <- sqrt(T) * eigen.vectors[, 1:K]
+lambda <- t(F) %*% Y / T
 
+# we change signs of values in lambda and F, such that values in lambda in 17th column will be nonnegative
+for (k in 1:K){
+  if (lambda[k, 17] < 0){
+    lambda[k,] = -lambda[k,]
+    F[,k] = -F[,k]
+  }
+}
+par(mfrow = c(1,1), mar=c(4,4,1,2))
+# plot(1:24, lambda[1,], xlab="Hours", ylab="", type="l", col="blue")
+# lines(1:24, lambda[2,], col="red")
+matplot(1:24, cbind(lambda[1,], lambda[2,]), lty=1, type="l", col=c("blue", "red"), xlab="hour", ylab="factor loadings")
+legend(1, max(lambda[1:2,]), c("Factor 1", "Factor 2"), col = c("blue", "red"), lty=1)
+@
+Factor 1 describes the noon peak and Factor 2 describes lower prices of electricity at night.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

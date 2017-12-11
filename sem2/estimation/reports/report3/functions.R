@@ -1,6 +1,5 @@
 factor.model.est <-
-  function(Y, K_max)
-    #function returning which K we should choose
+  function(Y, K_max, draw) #function returning which K we should choose
   {
     T <- nrow(Y)
     N <- ncol(Y)
@@ -32,5 +31,13 @@ factor.model.est <-
     # choose K which gives the minimal value
     PC1_K <- which.min(PC1)
     IPC1_K <- which.min(IPC1)
+    
+    if (draw) {
+      max.y <- max(max(IPC1), max(PC1)) + 2
+      par(mfrow = c(1,1), mar=c(4,4,1,2))
+      matplot(1:K_max, cbind(IPC1, PC1), pch=1, col=c("blue", "red"), xlab="K", ylab="IC", 
+              ylim = c(min(PC1[PC1_K],IPC1[IPC1_K]), max(max(IPC1),max(PC1))+2))
+      legend(1, max.y, c("IPC1", "PC1"), col = c("blue", "red"), pch=1)
+    }
     return (list(PC1_K, IPC1_K))
   }
