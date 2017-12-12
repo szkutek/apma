@@ -1,0 +1,215 @@
+\documentclass[12pt, a4paper]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX packages
+%\usepackage[OT4]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% global settings
+<<global_settings, echo=FALSE, warning=FALSE>>=
+library(knitr)
+library(xtable)
+library(mvtnorm) 
+library(matlib) 
+library(plot3D)
+library(readxl)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=7, fig.height=4)
+@
+
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% title page
+\title{Estimation theory -- Report 4}
+\author{Marta Frankowska, 208581 \\ Agnieszka Szkutek, 208619}
+\maketitle
+\tableofcontents 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Exercise 1}
+We generate a time series of 20 observations according to the model $y_t = \alpha + \varepsilon_t$, where $\varepsilon_t \sim N(0,\sigma^2)$ and $iid$.
+
+\subsection{Part 1}
+The density function of a single observation is 
+\[ f(y_t,\theta) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_t-\alpha)^2}{2\sigma^2}},  \]
+the likelihood function is 
+\begin{gather*} 
+L(\theta; y_1,\dots,y_N) = f(y_1,\dots,y_N; \theta) = \prod_{i=1}^{N} f(y_i; \theta) = \\
+= \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_1-\alpha)^2}{2\sigma^2}} \dots  \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_N-\alpha)^2}{2\sigma^2}}
+=  \left(\frac{1}{\sqrt{2\pi\sigma^2}} \right)^N e^{-\frac{1}{2\sigma^2} \sum_{i=1}^N (y_i-\alpha)^2} ,
+\end{gather*}
+and the log-likelihood is as follows
+\[ l(\theta; y_1,\dots,y_N) = \ln{L(\theta; y_1,\dots,y_N)} = -\frac{N}{2} \ln{2\pi} -\frac{N}{2} \ln{\sigma^2} -\frac{1}{2\sigma^2} \sum_{i=1}^N (y_i-\alpha)^2.\]
+
+
+\subsection{Part 2}
+pass
+
+
+\subsection{Part 3}
+The First Order Condition is as follows $\frac{\partial \ln L}{\partial \theta} $, where vector $\theta$ is equal to
+$ \theta = 
+  \begin{bmatrix}  
+    \alpha\\
+    \sigma^2
+  \end{bmatrix} $.
+% 
+%
+It gives the following set of equations
+\begin{gather*}
+\begin{cases}
+  \frac{\partial \ln L}{\partial \alpha} = 0 \\
+  \frac{\partial \ln L}{\partial \sigma^2} = 0 
+  \end{cases}
+\ \Rightarrow \ 
+\begin{cases}
+  \frac{1}{\sigma^2} \sum_{i=1}^N (y_i-\alpha) = 0 \\
+  -\frac{N}{2\sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i=1}^N (y_i-\alpha)^2 = 0
+\end{cases}
+\ \Rightarrow \ 
+\begin{cases}
+  \frac{N}{N} \sum_{i=1}^N y_i - N \alpha = 0\\
+  \frac{1}{\sigma^2} \sum_{i=1}^N (y_i-\alpha)^2 = N
+\end{cases} \\
+\ \Rightarrow \ 
+\begin{cases}
+  N (\bar{y}-\alpha) = 0\\
+  \sigma^2 = \frac{1}{N} \sum_{i=1}^N (y_i-\alpha)^2
+\end{cases}
+\ \Rightarrow \ 
+\begin{cases}
+  \alpha = \bar{y} \\
+  \sigma^2 = \frac{1}{N} \sum_{i=1}^N (y_i-\bar{y})^2
+\end{cases}
+\end{gather*}
+%
+So the ML estimators of the model parameters are
+\[ \begin{cases}
+  \hat{\alpha} = \bar{y}\\
+  \hat{\sigma}^2 = \frac{1}{N} \sum_{i=1}^N (y_i-\bar{y})^2
+\end{cases}
+\]
+
+
+
+
+\subsection{Part 4}
+\subsubsection{Variance-covariance matrix}
+
+The variance-covariance matrix of parameters $\hat{\alpha}$ and $\hat{\sigma}^{2}$:
+\[
+  \Sigma_{(\hat{\alpha},\hat{\sigma}^{2})}=
+  \begin{bmatrix}  
+    Var\hat{\alpha} & Cov(\hat{\alpha},\hat{\sigma}^{2})\\
+    Cov(\hat{\alpha},\hat{\sigma}^{2}) & Var\hat{\sigma}^{2}
+  \end{bmatrix},
+\]
+where $ Var\hat{\alpha}=Var\bar{y}=Var\left(\frac{1}{N}\sum^{N}_{i=1}y_{i}\right)=\frac{\sigma^{2}}{N} $.
+
+We know that $\frac{N\hat{\sigma}^{2}}{\sigma^{2}}\sim\chi^{2}(N-1)$ and $Var[\chi^{2}(N-1)]=2(N-1)$ so
+\[
+Var\left(\frac{N\hat{\sigma}^{2}}{\sigma^{2}}\right)=\frac{N^2}{\sigma^{4}}Var(\hat{\sigma}^{2})=2(N-1)
+\quad \Rightarrow \quad
+Var(\hat{\sigma}^{2})=\frac{2(N-1)\sigma^{4}}{N^{2}}
+\]
+To calculate $Cov(\hat{\alpha},\hat{\sigma}^{2})$ we will use the following fact.
+%
+\begin{lemma}
+Let $X_{1},...,X_{N}\sim N(\mu,\sigma^{2})$.
+Then $\bar{X}=\frac{1}{N}\sum_{i=1}^{N}X_{i}$ and $\hat{\sigma}^{2}=\frac{1}{N}\sum_{i=1}^{N}(X_i-\bar{X})^{2}$ are independent. 
+That means $Cov(\bar{X},\hat{\sigma}^{2})=0$.
+\end{lemma}
+%
+Thus the variance-covariance matrix of parameters $\hat{\alpha}$ and $\hat{\sigma}^{2}$ is
+\[
+  \Sigma_{(\hat{\alpha},\hat{\sigma}^{2})}=
+  \begin{bmatrix}  
+    \sigma^{2} & 0\\
+    0 & \frac{2(N-1)\sigma^{4}}{N^{4}}.
+  \end{bmatrix}
+\]
+
+
+\subsubsection{The asymptotic distribution of ML estimator}
+
+The asymptotic distribution of ML estimator is
+\[\hat{\theta}\xrightarrow[]{d}N(\theta_0, I(\theta_0)^{-1}),\]
+where $I(\theta_{0}) = -E_0(H(\theta_{0})) = -E_0\left(\frac{\partial^{2}\ln{L}}{\partial\theta_{0}\partial\theta_{0}'}\right)$.
+
+We calculate partial derivatives:
+\begin{align*}
+\frac{\partial\ln{L}}{\partial\alpha}=\frac{1}{\sigma^2}N(\bar{y}-\alpha), & \quad \frac{\partial^{2}\ln{L}}{\partial\alpha^{2}}=-\frac{N}{\sigma^{2}} \\
+\frac{\partial\ln{L}}{\partial\sigma^{2}}=-\frac{N}{2\sigma^{2}}+\frac{1}{2\sigma^{4}}\sum_{i=1}^{N}(y_{i}-\alpha)^{2}, & \quad
+  \frac{\partial^{2}\ln{L}}{\partial(\sigma^{2})^{2}}=\frac{N}{2\sigma^{4}}-\frac{1}{(\sigma^{2})^{3}}\sum_{i=1}^{N}(y_{i}-\alpha)^2 \\
+\frac{\partial^{2}\ln{L}}{\partial\alpha\partial\sigma^{2}} =\frac{\partial^{2}\ln{L}}{\partial\sigma^{2}\partial\alpha}=&-\frac{1}{\sigma^{4}}\sum_{i=1}^{N}(y_{i}-\alpha)
+\end{align*}
+
+Now we calculate expected value of the above derivatives:
+\begin{align*}
+E\frac{\partial^{2}\ln{L}}{\partial\alpha^{2}}=&-\frac{N}{\sigma^{2}} \\
+%
+E\frac{\partial^{2}\ln{L}}{\partial(\sigma^{2})^{2}}=&E\left(\frac{N}{2\sigma^{4}}\right)-E\left(\frac{1}{\sigma^{6}}\sum_{i=1}^{N}(y_{i}-\alpha)^{2}\right)=\frac{N}{2\sigma^{4}}-\frac{N}{\sigma^{4}}=-\frac{N}{2\sigma^{4}}\\
+%
+E\frac{\partial^{2}\ln{L}}{\partial\alpha\partial\sigma^{2}}=&-\frac{1}{\sigma^{4}}E\sum_{i=1}^{N}(y_{i}-\alpha)=-\frac{1}{\sigma^{4}}\sum_{i=1}^{N}E(y_{i}-\alpha)=0
+\end{align*}
+So 
+\[
+I^{-1}(\theta_{0})=
+\begin{bmatrix}  
+    \frac{N}{\sigma^{2}} & 0\\
+    0 & \frac{N}{2\sigma^{4}}
+  \end{bmatrix}^{-1}=
+	\begin{bmatrix}  
+    \frac{\sigma^{2}}{N} & 0\\
+    0 & \frac{2\sigma^{4}}{N}
+  \end{bmatrix}
+\]
+We see that asymptotic covariance of $\hat{\alpha}$ and $\hat{\sigma}^{2}$ is equal to 0.
+
+
+
+
+\subsection{Part 5}
+
+To calculate ML estimator of $1+\alpha+\alpha^{2}$ we use below property.
+%
+\begin{lemma}[Invariance property]
+$\hat{g}(\theta)=g(\hat{\theta})$, where $\hat{\theta}$ is MLE of $\theta$ and $g$ is continous and continously differentaible funcion.
+\end{lemma}
+%
+ML estimator of $\beta=1+\alpha+\alpha^{2}$ is 
+\[\hat{\beta}=\hat{g}(\alpha)=g(\hat{\alpha})=1+\hat{\alpha}+\hat{\alpha}^{2}=1+\bar{y}+\bar{y}^{2}.\]
+%
+Now we calculate $Var\hat{\beta}$ using fact that $\hat{\alpha}\sim N(\alpha,\frac{\sigma^{2}}{N})$.
+%
+\begin{gather*}
+Var(\hat{\beta})=Var(1+\hat{\alpha}+\hat{\alpha}^{2})=Var(\hat{\alpha}+\hat{\alpha}^{2})=E(\hat{\alpha}+\hat{\alpha}^{2})^{2}-(E(\hat{\alpha}+\hat{\alpha}^{2}))^{2}=\\
+=E\hat{\alpha}^{2}+2E\hat{\alpha}^{3}+E\hat{\alpha}^{4}-(E\hat{\alpha})^{2}-2E\hat{\alpha}E\hat{\alpha}^{2}-(E\hat{\alpha}^{2})^{2}
+\end{gather*}
+
+Using formula for normal distribution moments we get:
+\[ E\hat{\alpha}=\alpha ,\quad E\hat{\alpha}^{2}=\alpha^{2}+\frac{\sigma^{2}}{N} ,\quad E\hat{\alpha}^{3}=\alpha^{3}+3\alpha\frac{\sigma^{2}}{N} ,\quad\text{and}\quad
+E\hat{\alpha}^{4}=\alpha^{4}+6\alpha^{2}\frac{\sigma^{2}}{N}+3\frac{\sigma^{4}}{N^{2}}
+\]
+
+\begin{gather*}
+Var(\hat{\beta})=\alpha^{2}+\frac{\sigma^{2}}{N}+2\alpha^{3}+6\alpha\frac{\sigma^{2}}{N}+\alpha^{4}+6\alpha^{2}\frac{\sigma^{2}}{N}+3\frac{\sigma^{4}}{N^{2}}
+-\alpha^{2}-2\alpha\left(\alpha^{2}-\frac{\sigma^{2}}{N}\right) -\left(\alpha^{2}+\frac{\sigma^{2}}{N}\right)^{2}= \\
+= \frac{\sigma^{2}}{N}+4\alpha\frac{\sigma^{2}}{N}+4\alpha^{2}\frac{\sigma^{2}}{N}+2\frac{\sigma^4}{N^{2}}
+\end{gather*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
