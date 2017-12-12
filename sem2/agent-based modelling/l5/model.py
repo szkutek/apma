@@ -24,7 +24,9 @@ def distance(m, road):
 def traffic_model(M, rho, p, I=10):
     N = int(M * rho)
     iterations = [0] * I
+    means = [0] * I
     iterations[0] = init_model(M, N)
+    means[0] = np.average(np.array([x for x in iterations[0] if x > -1]))
 
     for i in range(1, I):
         prev_road = iterations[i - 1]
@@ -44,8 +46,10 @@ def traffic_model(M, rho, p, I=10):
 
                 curr_road[(m + vel) % M] = vel  # move
         iterations[i] = curr_road
-    # return iterations
-    return iterations[-1]
+        means[i] = np.average(np.array([x for x in curr_road if x > -1]))
+
+    # return iterations[-1]
+    return means
 
 
 def animate(index):
@@ -73,7 +77,7 @@ def animate(index):
     return mat, curr_road
 
 
-def plot_avg_velocity():
+def plot_avg_velocity(M, I):
     R = np.arange(0.1, 1.0, 0.1)
     P = [0., .1, .5, .7]
     Res = []
@@ -81,9 +85,9 @@ def plot_avg_velocity():
         res = []
         for r in R:
             tmp = traffic_model(M, r, p, I)
-            tmp2 = np.array([x for x in tmp if x > -1])
+            # tmp2 = np.array([x for x in tmp if x > -1])
 
-            res.append(np.average(tmp2))
+            res.append(np.average(tmp))
 
         plt.scatter(R, res)
         plt.title('Average velocity as a function of the density for p=' + str(p))
@@ -107,7 +111,7 @@ if __name__ == '__main__':
     I = 1000
     M = 100
     p = 0.3
-    rho = .1  # .1, .2, .6
+    rho = .2  # .1, .2, .6
     # iterations = traffic_model(M, rho, p, I)
 
     N = int(M * rho)
@@ -117,3 +121,5 @@ if __name__ == '__main__':
     mat = ax.matshow(prev_road)
     ani = animation.FuncAnimation(fig, animate, interval=300)
     plt.show()
+
+    # plot_avg_velocity(M, 500)
