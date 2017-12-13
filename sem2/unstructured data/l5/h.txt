@@ -1,0 +1,36 @@
+https://www.quora.com/How-can-I-extract-keywords-from-a-document-using-NLTK
+
+1) Tokenize each document:
+
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    tokens = tokenizer.tokenize(documents[curr_doc_index])
+
+2) Lemmatize each document (to find also keywords that appear in different forms):
+
+    lemmatizer = WordNetLemmatizer()
+    tokens = [lemmatizer.lemmatize(token) for token in tokens]
+
+3) Remove stopwords:
+
+    stopwords = stopwords.words('english')
+    tokens = [token for token in tokens if token not in stopwords]
+
+4) For every term in the current document, and every document in the set, compute the term frequency (how many times the term occurs in the document):
+
+    tf[curr_doc_index] = Counter(tokens)
+
+5) For every term, compute the inverse document frequency:
+
+    idf[t] = math.log(len(documents) / len([doc_index in range(len(documents)) if tf[doc_index][t] > 0]))
+
+You can compute the other variations of tf and idf. See the tf–idf Wiki page.
+
+6) For every term in the current document, and every document in the set, compute the tf-idf:
+
+    tfidf[t] = tf[curr_doc_index][t] * idf[t]
+
+7) Choose the top k words by tf-idf score:
+
+    terms_sorted_tfidf_desc = sorted(tfidf.items(), key=lambda x: -x[1])
+    terms, scores = zip(*terms_sorted_tfidf_desc)
+    keywords = terms[:k]

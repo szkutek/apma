@@ -54,7 +54,35 @@ and the log-likelihood is as follows
 
 
 \subsection{Part 2}
-pass
+The contour plot of log-likelihood function is displayed below.
+<<ex1.2, echo=FALSE, eval=TRUE>>=
+alpha <- 0
+sigma2 <- 4
+Y <- rnorm(n = 20, mean = alpha, sd = sqrt(sigma2))
+
+normal.loglik <- function(theta,y)
+{
+  log.f <- dnorm(y, mean = theta[1], sd = sqrt(theta[2]), log = TRUE)
+  return(sum(log.f))
+}
+
+# plod 3D picture depend on alpha and sigma2
+n.grid <- 200
+alpha.grid <- seq(-1,1,length.out = n.grid)
+sigma2.grid <- seq(2,6,length.out = n.grid)
+alpha.sigma2.grid <- expand.grid(alpha.grid,sigma2.grid)
+
+log.lik.values <- apply(alpha.sigma2.grid, MARGIN = 1, FUN = function(theta,y) normal.loglik(theta,y = Y), Y)
+log.lik.value <- matrix(log.lik.values, nrow = n.grid, ncol = n.grid)
+
+#contour plot
+contour(alpha.grid, sigma2.grid, log.lik.value, nlevels = 50, xlab = "alpha", ylab = "sigma2")
+
+alpha.est <- mean(Y)
+sigma2.est <- sum((Y - mean(Y))^2)/length(Y)
+
+points(alpha.est, sigma2.est, pch = 16, col = "red", cex = 3)
+@
 
 
 \subsection{Part 3}
@@ -211,5 +239,73 @@ Var(\hat{\beta})=\alpha^{2}+\frac{\sigma^{2}}{N}+2\alpha^{3}+6\alpha\frac{\sigma
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Exercise 2}
+In this exercise we will be using data set from file \textit{datalab4-1.xlsx}. We will assume that $y$ has a mixed normal distribution,
+\[ y_n \sim 
+  \begin{cases}
+    N(0,1), \quad\text{for } p \\
+    N(\mu, \sigma^2), \quad\text{for } 1-p, \\
+  \end{cases}
+  \quad\text{depending on }
+  \theta = \begin{bmatrix} \mu \\ \sigma^2 \\ p \end{bmatrix}.
+\]
+
+\subsection{Part 1}
+The density function of $y$ is equal to
+\[ f(y; \theta) = f(y; \mu, \sigma^2, p) = p\cdot  f(y; 0, 1) + (1-p) \cdot  f(y; \mu, \sigma^2), \]
+where 
+\[ f(y; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y-\mu)^2}{2\sigma^2}} \]
+is the density function for normal distribution with parameters $\mu$ and $\sigma^2$.
+
+
+The likelihood function of $y$ is obtained in the following way
+\begin{gather*} 
+  L = \prod_{i=1}^N f(y_i; \theta) = \prod_{i=1}^N  \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right) = \\
+  = \prod_{i=1}^N \left(  p\cdot  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_i^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}  \right).
+\end{gather*}
+
+
+The log-likelihood function of $y$ is as follows
+
+
+\subsection{Part 2}
+<<ex2.2, echo=FALSE, eval=TRUE>>=
+data1 <- read_excel('data_lab4-1.xlsx', col_names = FALSE)
+y <- as.matrix(data1)
+
+p <- 0.8
+mi <- y[1]
+
+normal.loglik <- function(sigma_2,y)
+{
+  log.f1 <- dnorm(y, mean = 0, sd = 1, log = TRUE)
+  log.f2 <- dnorm(y, mean = mi, sd = sigma_2, log = TRUE)
+  return(p*sum(log.f1) + (1-p)*sum(log.f2))
+}
+
+N = 2
+sigma_2_vector <- 1:2*N
+loglik <- 1:2*N
+i <- 1
+
+for (n in -N:N) {
+  sigma_2_vector[i] <- 1/exp(2*n)
+  loglik[i] <- normal.loglik(1/exp(2*n),y)
+  i <- i + 1
+}
+
+plot(sigma_2_vector,loglik,col = 'black')
+points(sigma_2_vector[which(loglik == max(loglik))],max(loglik),col = 'red',pch = 16)
+
+@
+
+
+
+
+
+
+
 
 \end{document}
