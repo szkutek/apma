@@ -262,42 +262,32 @@ is the density function for normal distribution with parameters $\mu$ and $\sigm
 
 The likelihood function of $y$ is obtained in the following way
 \begin{gather*} 
-  L = \prod_{i=1}^N f(y_i; \theta) = \prod_{i=1}^N  \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right) = \\
+  L(\theta; y_1,\dots,y_N) = \prod_{i=1}^N f(y_i; \theta) = \prod_{i=1}^N  \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right) = \\
   = \prod_{i=1}^N \left(  p\cdot  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_i^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}  \right).
 \end{gather*}
 
-
 The log-likelihood function of $y$ is as follows
-
+\begin{gather*} 
+  l(\theta; y_1,\dots,y_N) = \log{L(\theta; y_1,\dots,y_N)} = \log \prod_{i=1}^N f(y_i; \theta) = \sum_{i=1}^N \log f(y_i; \theta) = \\
+  \sum_{i=1}^N \log \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right).
+\end{gather*}
 
 \subsection{Part 2}
 <<ex2.2, echo=FALSE, eval=TRUE>>=
-data1 <- read_excel('data_lab4-1.xlsx', col_names = FALSE)
-y <- as.matrix(data1)
+loglike <- function(sigma, mu, p, y) {
+  sum(log(p * dnorm(y) + (1 - p) * dnorm(y, mean = mu, sd = sigma)))
+}
 
+Y <- read_excel('data_lab4-1.xlsx', col_names = FALSE)
+Y <- as.matrix(Y)
 p <- 0.8
-mi <- y[1]
+mu <- Y[1]
 
-normal.loglik <- function(sigma_2,y)
-{
-  log.f1 <- dnorm(y, mean = 0, sd = 1, log = TRUE)
-  log.f2 <- dnorm(y, mean = mi, sd = sigma_2, log = TRUE)
-  return(p*sum(log.f1) + (1-p)*sum(log.f2))
-}
+sigma.vector <- seq(0.01, 4, 0.01)
+loglike.sigma <- sapply(sigma.vector, function(s) loglike(sigma = s, mu = mu, p = p, y = Y))
 
-N = 2
-sigma_2_vector <- 1:2*N
-loglik <- 1:2*N
-i <- 1
-
-for (n in -N:N) {
-  sigma_2_vector[i] <- 1/exp(2*n)
-  loglik[i] <- normal.loglik(1/exp(2*n),y)
-  i <- i + 1
-}
-
-plot(sigma_2_vector,loglik,col = 'black')
-points(sigma_2_vector[which(loglik == max(loglik))],max(loglik),col = 'red',pch = 16)
+plot(sigma.vector, loglike.sigma, type = "b")
+points(sigma.vector[which(loglike.sigma == max(loglike.sigma))],max(loglike.sigma),col = 'red',pch = 16)
 
 @
 

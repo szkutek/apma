@@ -286,13 +286,15 @@ is the density function for normal distribution with parameters $\mu$ and $\sigm
 
 The likelihood function of $y$ is obtained in the following way
 \begin{gather*} 
-  L = \prod_{i=1}^N f(y_i; \theta) = \prod_{i=1}^N  \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right) = \\
+  L(\theta; y_1,\dots,y_N) = \prod_{i=1}^N f(y_i; \theta) = \prod_{i=1}^N  \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right) = \\
   = \prod_{i=1}^N \left(  p\cdot  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_i^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}  \right).
 \end{gather*}
 
-
 The log-likelihood function of $y$ is as follows
-
+\begin{gather*} 
+  l(\theta; y_1,\dots,y_N) = \log{L(\theta; y_1,\dots,y_N)} = \log \prod_{i=1}^N f(y_i; \theta) = \sum_{i=1}^N \log f(y_i; \theta) = \\
+  \sum_{i=1}^N \log \left(  p\cdot  f(y_i; 0, 1) + (1-p) \cdot  f(y_i; \mu, \sigma^2) \right).
+\end{gather*}
 
 \subsection{Part 2}
 \begin{knitrout}
