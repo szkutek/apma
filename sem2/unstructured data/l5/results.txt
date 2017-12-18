@@ -1,0 +1,14 @@
+// minus stopwords
+
+keywords (all words)
+('Harry', 'say', 'I', 'He', 'get', 'Ron', 'go', 'look', 'Hagrid', 'The', 'could', 'It', 'know', 'Hermione', 'back', 'one', 'think', 'see', 'like', 'They')
+
+keywords (only nouns)
+('Harry', 'Ron', 'Hagrid', 'Hermione', 'Professor', 'Snape', 'Dumbledore', 'Dudley', 'time', 'something', 'Malfoy', 'door', 'Neville', 'eye', 'Vernon', 'Uncle', 'Quirrell', 'head', 'McGonagall', 'hand')
+
+keywords (nouns NN and NNS lemmatized)
+('time', 'something', 'door', 'eye', 'head', 'hand', 'way', 'thing', 'room', 'boy', 'people', 'year', 'face', 'house', 'day', 'anything', 'wand', 'letter', 'school', 'voice')
+
+keywords (nouns NN and NNS not lemmatized)
+('something', 'time', 'door', 'eyes', 'way', 'head', 'room', 'people', 'face', 'boy', 'house', 'anything', 'hand', 'school', 'wand', 'day', 'voice', 'cloak', 'bit', 'ter')
+
