@@ -98,12 +98,14 @@ and the log-likelihood is as follows
 \subsection{Part 2}
 The contour plot of log-likelihood function is displayed below.
 \begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
 
 {\centering \includegraphics[width=\maxwidth]{figure/ex1_2-1} 
 
 }
 
+\caption[Contour plot of log-likelihood function]{Contour plot of log-likelihood function. The red point marks the maksimum of the function.}\label{fig:ex1.2}
+\end{figure}
 
 
 \end{knitrout}
@@ -188,9 +190,20 @@ Thus the variance-covariance matrix of parameters $\hat{\alpha}$ and $\hat{\sigm
   \Sigma_{(\hat{\alpha},\hat{\sigma}^{2})}=
   \begin{bmatrix}  
     \sigma^{2} & 0\\
-    0 & \frac{2(N-1)\sigma^{4}}{N^{4}}.
-  \end{bmatrix}
+    0 & \frac{2(N-1)\sigma^{4}}{N^{4}}
+  \end{bmatrix}.
 \]
+Substituting $\sigma^2 = Var(Y)$ and $N$ equal to length of the data we obtain the sample variance-covariance matix 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##          [,1]        [,2]
+## [1,] 2.991618 0.000000000
+## [2,] 0.000000 0.002125572
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
 
 
 \subsubsection{The asymptotic distribution of ML estimator}
@@ -249,16 +262,15 @@ Now we calculate $Var\hat{\beta}$ using fact that $\hat{\alpha}\sim N(\alpha,\fr
 Var(\hat{\beta})=Var(1+\hat{\alpha}+\hat{\alpha}^{2})=Var(\hat{\alpha}+\hat{\alpha}^{2})=E(\hat{\alpha}+\hat{\alpha}^{2})^{2}-(E(\hat{\alpha}+\hat{\alpha}^{2}))^{2}=\\
 =E\hat{\alpha}^{2}+2E\hat{\alpha}^{3}+E\hat{\alpha}^{4}-(E\hat{\alpha})^{2}-2E\hat{\alpha}E\hat{\alpha}^{2}-(E\hat{\alpha}^{2})^{2}
 \end{gather*}
-
-Using formula for normal distribution moments we get:
+Using formula for normal distribution moments we get
 \[ E\hat{\alpha}=\alpha ,\quad E\hat{\alpha}^{2}=\alpha^{2}+\frac{\sigma^{2}}{N} ,\quad E\hat{\alpha}^{3}=\alpha^{3}+3\alpha\frac{\sigma^{2}}{N} ,\quad\text{and}\quad
-E\hat{\alpha}^{4}=\alpha^{4}+6\alpha^{2}\frac{\sigma^{2}}{N}+3\frac{\sigma^{4}}{N^{2}}
+E\hat{\alpha}^{4}=\alpha^{4}+6\alpha^{2}\frac{\sigma^{2}}{N}+3\frac{\sigma^{4}}{N^{2}},
 \]
-
+and
 \begin{gather*}
 Var(\hat{\beta})=\alpha^{2}+\frac{\sigma^{2}}{N}+2\alpha^{3}+6\alpha\frac{\sigma^{2}}{N}+\alpha^{4}+6\alpha^{2}\frac{\sigma^{2}}{N}+3\frac{\sigma^{4}}{N^{2}}
 -\alpha^{2}-2\alpha\left(\alpha^{2}-\frac{\sigma^{2}}{N}\right) -\left(\alpha^{2}+\frac{\sigma^{2}}{N}\right)^{2}= \\
-= \frac{\sigma^{2}}{N}+4\alpha\frac{\sigma^{2}}{N}+4\alpha^{2}\frac{\sigma^{2}}{N}+2\frac{\sigma^4}{N^{2}}
+= \frac{\sigma^{2}}{N}+4\alpha\frac{\sigma^{2}}{N}+4\alpha^{2}\frac{\sigma^{2}}{N}+2\frac{\sigma^4}{N^{2}}.
 \end{gather*}
 
 
@@ -297,19 +309,129 @@ The log-likelihood function of $y$ is as follows
 \end{gather*}
 
 \subsection{Part 2}
+In the left plot we took $\sigma = [0.01,0.02,0.03,\dots,4]$ and in the right $\sigma = [e^{-1}, e^{-2}, e^{-3},\dots, e^{-N}]$, where $N$ is the length of the data.
 \begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
 
 {\centering \includegraphics[width=\maxwidth]{figure/ex2_2-1} 
 
 }
 
+\caption[Log-likelihood function for different values of sigma]{Log-likelihood function for different values of sigma}\label{fig:ex2.2}
+\end{figure}
 
 
 \end{knitrout}
 
+\begin{gather*}
+L(\theta; y_1,\dots,y_N)
+  = \prod_{i=1}^N \left(  p  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_i^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}  \right) = \\
+  = \left(  p  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_1^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_1-\mu)^2}{2\sigma^2}}  \right) \cdots
+    \left(  p  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_N^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_N-\mu)^2}{2\sigma^2}}  \right)
+\end{gather*}
+We took $\mu = y_1$, so  
+\[ \mu - y_1 = 0 \quad\Rightarrow\quad e^{-\frac{(y_1-\mu)^2}{2\sigma^2}} = e^0 = 1. \]
+Then the second component of the sum is $(1-p)\frac{1}{\sqrt{2\pi\sigma^2}}$. But if we take $\sigma$ close to 0, then the whole fraction goes to infinity.
+\begin{gather*} 
+  (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} \rightarrow^{\sigma\rightarrow 0}  \infty 
+  \quad\Rightarrow\quad 
+  \left(  p  \frac{1}{\sqrt{2\pi}} e^{-\frac{y_1^2}{2}} + (1-p)\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y_1-\mu)^2}{2\sigma^2}}  \right) \rightarrow^{\sigma\rightarrow 0} \infty \quad\Rightarrow\quad \\
+  \quad\Rightarrow\quad 
+  L(\theta; y_1,\dots,y_N) \rightarrow^{\sigma\rightarrow 0} \infty 
+  \quad\Rightarrow\quad 
+  \ln{L(\theta; y_1,\dots,y_N)} \rightarrow^{\sigma\rightarrow 0} \infty 
+\end{gather*}
+Then $l(\theta; y_1,\dots,y_N)$ goes to infinity, so maximum of $l(\theta; y_1,\dots,y_N)$ doesn't exist.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Exercise 3}
+
+We suppose that $y$ has a Bernoulli distribution
+\[ y= 
+\begin{cases}
+  1, \quad F(x_n; \theta) \\
+  0, \quad 1-F(x_n; \theta),
+\end{cases}
+\]
+where $F(x_n; \theta) = \frac{e^{\theta_1 + x_n \theta_2}}{1+e^{\theta_1 + x_n \theta_2}}$ is the probability of success.
+
+\subsection{Part 1}
+The marginal effect of variable $x$ on the probability of success is given by the partial derivative
+\begin{gather*} 
+  \frac{\partial F(x; \theta)}{\partial x} =   
+  \frac{\partial}{\partial x} \left(  \frac{e^{\theta_1 + x_n \theta_2}}{1+e^{\theta_1 + x_n \theta_2}}  \right) = 
+  \frac{\theta_2 e^{\theta_1 + x_n \theta_2} (1+e^{\theta_1 + x_n \theta_2}) -  e^{\theta_1 + x_n \theta_2} \theta_2 e^{\theta_1 + x_n \theta_2} }
+    {\left( 1+e^{\theta_1 + x_n \theta_2} \right)^2 } = \\ =
+  \theta_2 e^{\theta_1 + x_n \theta_2} \frac{1+ e^{\theta_1 + x_n \theta_2} -e^{\theta_1 + x_n \theta_2} }
+    {\left( 1+e^{\theta_1 + x_n \theta_2} \right)^2 } =
+  \frac{\theta_2 e^{\theta_1 + x_n \theta_2}}{\left( 1+e^{\theta_1 + x_n \theta_2} \right)^2 }.
+\end{gather*}
+
+
+\subsection{Part 2}
+The likelihood function is as follows
+\[L(\theta;(x_{1},y_{1}),...,(x_{N},y_{N}))=\prod_{k=1}^{N}(F(x_{k};\theta))^{y_{k}}(1-F(x_{k};\theta))^{1-y_{k}}\]
+so the log-likelihood function is 
+\begin{gather*}
+  l(\theta;(x_{1},y_{1}),...,(x_{N},y_{N}))=\sum_{k=1}^{N}(y_{k}\ln{F(x_{k};\theta)}+(1-y_{k})\ln{(1-F(x_{k};\theta))})=\\
+    =\sum_{k=1}^{N}(y_{k}
+      \ln{\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}}
+      +(1-y_{k})\ln{(1-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}}))=\\
+    =\sum_{k=1}^{N}(y_{k}(\theta_{1}+x_{k}\theta_{2})-y_{k}\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})}+\ln{1}-\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})}-\\
+      -y_{k}\ln{1}+y_{k}\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})})
+    =\sum_{k=1}^{N}(y_{k}(\theta_{1}+x_{k}\theta_{2})-\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})})
+\end{gather*}
+
+
+\subsection{Part 3}
+We can see that we are not able to solve this set of equations analitically.
+\[\frac{\partial l}{\partial\theta_{1}}=\sum_{k=1}^{N}(y_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}})=0\]
+\[\frac{\partial l}{\partial\theta_{2}}=\sum_{k=1}^{N}(y_{k}x_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}x_{k}}{1+e^{\theta_{1}+x_{k}\theta_{2}}})=0\]
+
+
+
+\subsection{Part 4}
+Because we can't calculate $\theta_1$ and $\theta_2$ analitically, we will calculate the maximum of the log-likelihood function numerically using Newton's method.
+
+The $\hat{\theta}_1$ and $\hat{\theta}_2$ are equal to
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## [1] -0.2913384  1.0768976
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+We tested various starting points for the Newton's method to find $\hat{\theta}_1$ and $\hat{\theta}_2$ and the results were almost always the same, the error was $O(10^{-4})$.
+
+
+\subsection{Part 5}
+Using Newton's method we obtained also the hesian matix of the log-likelihood function and to estimate the variance-covariance matrix we use the following formula
+$ \Sigma_{\hat{\theta}} = (-H(\hat{\theta}))^{-1}$.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##              [,1]         [,2]
+## [1,]  0.071714628 -0.007825794
+## [2,] -0.007825794  0.046786323
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+\subsection{Part 6}
+The estimated marginal effect of $x$ on $y$ using $\hat{\theta}_1$, $\hat{\theta}_2$ and $\bar{x}$ is equal to
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## [1] 0.4643691
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 
 
