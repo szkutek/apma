@@ -361,20 +361,26 @@ The likelihood function is as follows
 \[L(\theta;(x_{1},y_{1}),...,(x_{N},y_{N}))=\prod_{k=1}^{N}(F(x_{k};\theta))^{y_{k}}(1-F(x_{k};\theta))^{1-y_{k}}\]
 so the log-likelihood function is 
 \begin{gather*}
-  l(\theta;(x_{1},y_{1}),...,(x_{N},y_{N}))=\sum_{k=1}^{N}(y_{k}\ln{F(x_{k};\theta)}+(1-y_{k})\ln{(1-F(x_{k};\theta))})=\\
-    =\sum_{k=1}^{N}(y_{k}
+  l(\theta;(x_{1},y_{1}),...,(x_{N},y_{N}))=\sum_{k=1}^{N}\left(y_{k}\ln{F(x_{k};\theta)}+(1-y_{k})\ln{(1-F(x_{k};\theta))}\right)=\\
+    =\sum_{k=1}^{N}\left(y_{k}
       \ln{\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}}
-      +(1-y_{k})\ln{(1-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}}))=\\
-    =\sum_{k=1}^{N}(y_{k}(\theta_{1}+x_{k}\theta_{2})-y_{k}\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})}+\ln{1}-\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})}-\\
-      -y_{k}\ln{1}+y_{k}\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})})
+      +(1-y_{k})\ln{\left(1-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}} \right) }\right)=\\
+    =\sum_{k=1}^{N}\left(y_{k}
+      \ln{\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}}
+      +(1-y_{k})\ln{\frac{1}{1+e^{\theta_{1}+x_{k}\theta_{2}}} }\right)=\\
+    =\sum_{k=1}^{N}\left(y_{k}(\theta_{1}+x_{k}\theta_{2})-y_{k}\ln{\left(1+e^{\theta_{1}+x_{k}\theta_{2}}\right)}
+      -\ln{\left(1+e^{\theta_{1}+x_{k}\theta_{2}}\right)}
+      +y_{k}\ln{\left(1+e^{\theta_{1}+x_{k}\theta_{2}}\right)}\right) = \\
     =\sum_{k=1}^{N}(y_{k}(\theta_{1}+x_{k}\theta_{2})-\ln{(1+e^{\theta_{1}+x_{k}\theta_{2}})})
 \end{gather*}
 
 
 \subsection{Part 3}
 We can see that we are not able to solve this set of equations analitically.
-\[\frac{\partial l}{\partial\theta_{1}}=\sum_{k=1}^{N}(y_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}})=0\]
-\[\frac{\partial l}{\partial\theta_{2}}=\sum_{k=1}^{N}(y_{k}x_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}x_{k}}{1+e^{\theta_{1}+x_{k}\theta_{2}}})=0\]
+\[ \begin{cases}
+\frac{\partial l}{\partial\theta_{1}}=\sum_{k=1}^{N}\left(y_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}\right)=0 \\
+\frac{\partial l}{\partial\theta_{2}}=\sum_{k=1}^{N}\left(y_{k}x_{k}-\frac{e^{\theta_{1}+x_{k}\theta_{2}}x_{k}}{1+e^{\theta_{1}+x_{k}\theta_{2}}}\right)=0
+\end{cases} \]
 
 
 

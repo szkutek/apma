@@ -15,9 +15,9 @@ def extract_names_from_page_NNP(page):
 
     sentences = nltk.sent_tokenize(sample)
     tokens = nltk.tokenize.word_tokenize(sample)
-    print(tokens)
+    # print(tokens)
     tags = nltk.pos_tag(tokens)
-    print(tags)
+    # print(tags)
 
     nnp = [t[0] for t in tags if t[1] == 'NNP' or t[1] == 'NNPS']  # get only proper nouns
 
@@ -66,7 +66,8 @@ def ex1(res_per_char_per_page):
     plt.xlabel('page number')
     plt.ylabel('number of occurrences')
     plt.title('Character mentions per page')
-    plt.savefig('ex1-character-mentions.png')
+    plt.savefig('ex1-character-mentions-150.png')
+    plt.clf()
 
 
 def ex4(res_per_char_per_page):
@@ -76,17 +77,18 @@ def ex4(res_per_char_per_page):
     plt.xlabel('page number')
     plt.ylabel('character')
     plt.title('Graph of co-occurrences')
-    plt.savefig('ex4-cooccurrences.png')
+    plt.savefig('ex4-cooccurrences-150.png')
+    plt.clf()
 
 
 if __name__ == '__main__':
     pdf = pdfplumber.open("HP.pdf")
     # create dictionary of the form {char_name: {page_number: number_of_occurrences}}
     compiled_res_per_char_per_page = {}
-    for index, page in enumerate(pdf.pages):
+    for index, page in enumerate(pdf.pages[:150]):
         tuples = extract_names_from_page_NNP(page)
         compile_res_per_page(index, tuples, compiled_res_per_char_per_page)
-    print(compiled_res_per_char_per_page)
+    # print(compiled_res_per_char_per_page)
 
     # LIMIT RESULTS TO THE MOST COMMON CHARACTERS IN THE WHOLE BOOK
     # get number of occurrences in the whole book per character
