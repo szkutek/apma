@@ -5,7 +5,7 @@ import imageio
 
 def init_pos(bnum, N):
     boids_pos = [np.array([np.random.rand() * N, np.random.rand() * N]) for _ in range(bnum)]
-    boids_vel = [np.array([1, 2]) for _ in range(bnum)]
+    boids_vel = [np.array([1, 1]) for _ in range(bnum)]
     return boids_pos, boids_vel
 
 
@@ -29,24 +29,18 @@ def rule2(bj, boids_pos, obstacles):
     c = np.array([0., 0.])
     for pos in boids_pos:
         if distance(pos, bj) < 5:
-            c -= (pos - bj) / 2
+            c -= (pos - bj)
     for obj in obstacles:
         if distance(obj, bj) < 5:
             c -= (obj - bj)
-    return c
+    return c * 0.2
 
 
 def rule3(bj, bv, boids_pos, boids_vel):
     """ Rule 3: Boids try to match velocity with neighbouring boids. """
-    pv = np.array([0., 0.])  # perceived velocity
-    n = 0
-    for pos, vel in zip(boids_pos, boids_vel):
-        if distance(bj, pos) < 20:
-            pv += vel
-            n += 1
-    pv -= bv
-    n -= 1
-    pv = pv / n if n > 0 else pv
+    tmp = [vel for pos, vel in zip(boids_pos, boids_vel) if distance(bj, pos) < 20]
+    n = len(tmp) - 1
+    pv = (sum(tmp) - bv) / n if n > 0 else bv  # perceived velocity
     return (pv - bv) / 8
 
 
@@ -88,8 +82,10 @@ def move_boids(boids_pos, boids_vel, bnum, N, obstacles):
 def draw_boids(boids_pos, index, obstacles):
     plt.xlim(0, grid_size)
     plt.ylim(0, grid_size)
-    x, y = list(zip(*obstacles))
-    plt.plot(x, y, '.r')
+
+    if obstacles:
+        x, y = list(zip(*obstacles))
+        plt.plot(x, y, '.r')
 
     x, y = list(zip(*boids_pos))
     plt.plot(x, y, '.')
@@ -117,7 +113,8 @@ if __name__ == '__main__':
     plt.figure()
 
     M = 100
-    obstacles = [np.array([np.random.rand() * grid_size, np.random.rand() * grid_size]) for _ in range(5)]
+    # obstacles = [np.array([np.random.rand() * grid_size, np.random.rand() * grid_size]) for _ in range(5)]
+    obstacles = []
 
     for i in range(M):
         draw_boids(boids_pos, i, obstacles)
