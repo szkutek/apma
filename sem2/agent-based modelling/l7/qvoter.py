@@ -44,13 +44,16 @@ def MCsimulations(g, M, f, P, MC=100, MC2=1):
 
 
 def situation_model_M(P, MC, rep):
-    MM = [2, 3, 4, 6, 8, 10]
-    # MM = [10]
+    # MM = [2, 3, 4, 6, 8, 10]
+    MM = [3, 6, 10]
     f = 0.5
 
     plt.figure()
     for M in MM:
+        start = timer()
         res = MCsimulations('ba', M, f, P, MC, rep)
+        print(M)
+        print(timer() - start)
         plt.plot(P, res, '.')
 
     res = MCsimulations('complete', 0, f, P, MC, rep)
@@ -71,7 +74,10 @@ def situation_model_f(P, MC, rep):
 
     plt.figure()
     for f in F:
+        start = timer()
         res = MCsimulations('ba', M, f, P, MC, rep)
+        print(f)
+        print(timer() - start)
         plt.plot(P, res, '.')
 
     legend = ["f=" + str(f) for f in F]
@@ -84,9 +90,9 @@ def situation_model_f(P, MC, rep):
 
 
 if __name__ == "__main__":
-    MC = 1000
-    rep = 1000
-    P = np.arange(0.1, 0.7, 0.02)
+    MC = 100
+    rep = 10
+    P = np.arange(0., 1, 0.01)
 
     start = timer()
 
