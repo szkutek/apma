@@ -1,9 +1,9 @@
+import random as rnd
+from timeit import default_timer as timer
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import random as rnd
-import matplotlib.pyplot as plt
-import pylab
-from timeit import default_timer as timer
 
 
 def new_graph(g, N, M):
@@ -86,7 +86,7 @@ def situation_model_f(P, MC, rep):
 if __name__ == "__main__":
     MC = 1000
     rep = 1000
-    P = np.arange(0.1, 1, 0.02)
+    P = np.arange(0.1, 0.7, 0.02)
 
     start = timer()
 
