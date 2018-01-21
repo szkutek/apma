@@ -474,8 +474,10 @@ Monte_Carlo_test_random_walk <- function(alpha0,alpha,N,T)
 }
 
 # size
-cat("Size for residuals from N(0,1): ", Monte_Carlo_test_normal(2,2,N,T))
-cat("Size for residuals from random walk: ", Monte_Carlo_test_random_walk(2,2,N,T))
+cat("Size for residuals from N(0,1): ")
+Monte_Carlo_test_normal(2,2,N,T)
+cat("Size for residuals from random walk: ")
+Monte_Carlo_test_random_walk(2,2,N,T)
 @
 
 And the powers are as follows 
