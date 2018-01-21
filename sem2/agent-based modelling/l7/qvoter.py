@@ -13,19 +13,19 @@ def new_graph(g, N, M):
         return nx.barabasi_albert_graph(N, M)
 
 
-def MCsimulations(g, M, f, P, MC=100, MC2=1):
+def MCsimulations(g, M, f, P, T=100, MC=1):
     N = 100
     q = 4
-    magnP = np.zeros(len(P), float)
+    c = np.zeros(len(P), float)
 
     for en, p in enumerate(P):
-        final_magn = 0
-        for _ in range(MC2):
+        final_c = 0
+        for _ in range(MC):
             G = new_graph(g, N, M)
             votes = np.ones(N, int)
 
-            for i in range(MC - 1):
-                for _ in range(N - 1):
+            for i in range(T):
+                for _ in range(N):
                     voter = rnd.randint(0, N - 1)
 
                     if rnd.random() < p:  # independent
@@ -37,10 +37,10 @@ def MCsimulations(g, M, f, P, MC=100, MC2=1):
                         if abs(sum(subset_votes)) == q:
                             votes[voter] = subset_votes[0]
 
-            final_magn += sum(votes) / N
+            final_c += sum(votes) / N
 
-        magnP[en] = final_magn / MC2
-    return magnP
+        c[en] = final_c / MC
+    return c
 
 
 def situation_model_M(P, MC, rep):
@@ -68,14 +68,14 @@ def situation_model_M(P, MC, rep):
     plt.close()
 
 
-def situation_model_f(P, MC, rep):
+def situation_model_f(P, T, MC):
     M = 4
     F = np.arange(0.2, 0.6, 0.1)
 
     plt.figure()
     for f in F:
         start = timer()
-        res = MCsimulations('ba', M, f, P, MC, rep)
+        res = MCsimulations('complete', M, f, P, T, MC)
         print(f)
         print(timer() - start)
         plt.plot(P, res, '.')
@@ -90,17 +90,16 @@ def situation_model_f(P, MC, rep):
 
 
 if __name__ == "__main__":
-    MC = 100
-    rep = 10
+    T = 100
+    MC = 10
     P = np.arange(0., 1, 0.01)
 
     start = timer()
-
     print("M:")
-    situation_model_M(P, MC, rep)
+    situation_model_M(P, T, MC)
     print(timer() - start)
 
     start = timer()
     print("f:")
-    situation_model_f(P, MC, rep)
+    situation_model_f(P, T, MC)
     print(timer() - start)
